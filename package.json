@@ -1,0 +1,49 @@
+{
+	"name": "stock-management",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev --turbopack",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome check --write --unsafe ./src",
+		"typeorm": "ENVIRONMENT=local ts-node --project tsconfig.typeorm.json ./node_modules/typeorm/cli.js --dataSource src/lib/db.ts",
+		"migration:generate": "npm run typeorm migration:generate ./src/migrations/Migration",
+		"migration:run": "npm run typeorm migration:run",
+		"migration:revert": "npm run typeorm migration:revert"
+	},
+	"dependencies": {
+		"@emotion/cache": "latest",
+		"@emotion/react": "latest",
+		"@emotion/styled": "latest",
+		"@mui/icons-material": "latest",
+		"@mui/material": "latest",
+		"@mui/material-nextjs": "latest",
+		"@mui/x-charts": "^8.9.0",
+		"@mui/x-data-grid": "^8.9.1",
+		"@mui/x-date-pickers": "^8.9.0",
+		"@mui/x-tree-view": "^8.9.0",
+		"@react-spring/web": "^10.0.1",
+		"dayjs": "^1.11.13",
+		"dotenv": "^17.2.0",
+		"mysql2": "^3.14.2",
+		"next": "15.4.3",
+		"react": "19.1.0",
+		"react-dom": "19.1.0",
+		"reflect-metadata": "^0.2.2",
+		"typeorm": "^0.3.25",
+		"typeorm-naming-strategies": "^4.1.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"@tailwindcss/postcss": "^4",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"tailwindcss": "^4",
+		"ts-node": "^10.9.2",
+		"tsconfig-paths": "^4.2.0",
+		"typeorm-ts-node-commonjs": "^0.3.20",
+		"typescript": "^5"
+	}
+}
