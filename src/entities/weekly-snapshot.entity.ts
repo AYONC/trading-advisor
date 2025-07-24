@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { BaseEntity } from './BaseEntity';
+import { BaseEntity } from './base.entity';
 
 @Entity('weekly_snapshot')
 export class WeeklySnapshot extends BaseEntity {

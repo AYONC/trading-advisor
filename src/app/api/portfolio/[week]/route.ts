@@ -1,7 +1,7 @@
 'use server';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { DataSource } from 'typeorm';
-import { WeeklySnapshot } from '@/entities/WeeklySnapshot';
+import { WeeklySnapshot } from '@/entities/weekly-snapshot.entity';
 import { getDataSource } from '@/lib/db';
 
 export async function GET(

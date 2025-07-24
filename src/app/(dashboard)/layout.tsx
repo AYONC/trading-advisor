@@ -10,7 +10,7 @@ import type {} from '@mui/x-tree-view/themeAugmentation';
 import type * as React from 'react';
 import Header from '@/components/Header';
 import SideMenu from '@/components/SideMenu';
-import AppTheme from '@/shared-theme/AppTheme';
+import AppTheme from '@/theme/AppTheme';
 import {
 	chartsCustomizations,
 	datePickersCustomizations,

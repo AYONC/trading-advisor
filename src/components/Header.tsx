@@ -1,5 +1,5 @@
 import Stack from '@mui/material/Stack';
-import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
+import ColorModeIconDropdown from '../theme/ColorModeIconDropdown';
 
 export default function Header() {
 	return (

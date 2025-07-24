@@ -1,6 +1,6 @@
 import { alpha, type Theme } from '@mui/material/styles';
 import type { TreeViewComponents } from '@mui/x-tree-view/themeAugmentation';
-import { brand, gray } from '../../shared-theme/themePrimitives';
+import { brand, gray } from '../themePrimitives';
 
 /* eslint-disable import/prefer-default-export */
 export const treeViewCustomizations: TreeViewComponents<Theme> = {
