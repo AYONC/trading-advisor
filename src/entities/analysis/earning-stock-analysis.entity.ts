@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Stock } from './stock.entity';
+import { BaseEntity } from '../base.entity';
+import { Stock } from '../stock.entity';
 
 @Entity('earning_stock_analysis')
 export class EarningStockAnalysis extends BaseEntity {
@@ -24,4 +24,7 @@ export class EarningStockAnalysis extends BaseEntity {
 
 	@Column({ comment: 'EPS Revision 등급' })
 	epsRevisionGrade!: string; // A, B, C, D, E
+
+	@Column({ comment: 'EPS Growth 조정 비율', nullable: true })
+	epsGrowthAdjustedRate?: number;
 }

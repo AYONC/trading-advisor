@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Stock } from './stock.entity';
+import { BaseEntity } from '../base.entity';
+import { Stock } from '../stock.entity';
 
 @Entity('sales_growth')
 export class SalesGrowth extends BaseEntity {
@@ -18,7 +18,4 @@ export class SalesGrowth extends BaseEntity {
 
 	@Column({ comment: '값' })
 	value!: number;
-
-	@Column({ comment: '조정 비율' })
-	adjustedRate!: number;
 }

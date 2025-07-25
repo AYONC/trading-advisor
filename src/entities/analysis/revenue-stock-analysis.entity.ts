@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
-import { BaseEntity } from './base.entity';
-import { Stock } from './stock.entity';
+import { BaseEntity } from '../base.entity';
+import { Stock } from '../stock.entity';
 
 @Entity('revenue_stock_analysis')
 export class RevenueStockAnalysis extends BaseEntity {
@@ -21,4 +21,7 @@ export class RevenueStockAnalysis extends BaseEntity {
 
 	@Column({ comment: 'Operating Margin' })
 	operatingMargin!: number;
+
+	@Column({ comment: 'Sales Growth 조정 비율', nullable: true })
+	salesGrowthAdjustedRate?: number;
 }
