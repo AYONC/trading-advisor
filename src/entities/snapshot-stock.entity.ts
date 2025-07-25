@@ -20,18 +20,18 @@ export class SnapshotStock extends BaseEntity {
 	@Column({ comment: '기간' })
 	period!: number;
 
-	@Column({ comment: '주식 수' })
+	@Column({ comment: '주식 수', type: 'decimal', precision: 6, scale: 2 })
 	shares!: number;
 
-	@Column({ comment: '매수 단가' })
+	@Column({ comment: '매수 단가', type: 'decimal', precision: 16, scale: 2 })
 	buyPrice!: number;
 
-	@Column({ comment: '매도 단가' })
+	@Column({ comment: '매도 단가', type: 'decimal', precision: 16, scale: 2 })
 	sellPrice!: number;
 
-	@Column({ comment: '총 수익' })
+	@Column({ comment: '총 수익', type: 'decimal', precision: 16, scale: 2 })
 	profit!: number;
 
-	@Column({ comment: '총 수익률' })
+	@Column({ comment: '총 수익률', type: 'decimal', precision: 6, scale: 4 })
 	profitRate!: number;
 }

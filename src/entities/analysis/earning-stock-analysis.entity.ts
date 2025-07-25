@@ -13,18 +13,24 @@ export class EarningStockAnalysis extends BaseEntity {
 	@Column({ comment: '기간' })
 	period!: number;
 
-	@Column({ comment: '주가' })
+	@Column({ comment: '주가', type: 'decimal', precision: 16, scale: 2 })
 	price!: number;
 
-	@Column({ comment: 'P/E' })
+	@Column({ comment: 'P/E', type: 'decimal', precision: 6, scale: 2 })
 	pe!: number; // 0.00 ~ 1000.00
 
-	@Column({ comment: 'ROA' })
+	@Column({ comment: 'ROA', type: 'decimal', precision: 6, scale: 4 })
 	roa!: number; // 0.00 ~ 1.00
 
 	@Column({ comment: 'EPS Revision 등급' })
 	epsRevisionGrade!: string; // A, B, C, D, E
 
-	@Column({ comment: 'EPS Growth 조정 비율', nullable: true })
+	@Column({
+		comment: 'EPS Growth 조정 비율',
+		nullable: true,
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	epsGrowthAdjustedRate?: number;
 }

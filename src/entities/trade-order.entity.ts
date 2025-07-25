@@ -17,10 +17,10 @@ export class TradeOrder extends BaseEntity {
 	@Column()
 	action!: TradeAction;
 
-	@Column()
+	@Column({ type: 'decimal', precision: 6, scale: 2 })
 	shares!: number;
 
-	@Column()
+	@Column({ type: 'decimal', precision: 16, scale: 2 })
 	price!: number;
 
 	@Column()

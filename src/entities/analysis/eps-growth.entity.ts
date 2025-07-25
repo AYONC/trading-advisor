@@ -16,6 +16,6 @@ export class EpsGrowth extends BaseEntity {
 	@Column({ comment: '연도' })
 	year!: number;
 
-	@Column({ comment: '값' })
+	@Column({ comment: '값', type: 'decimal', precision: 6, scale: 4 })
 	value!: number;
 }

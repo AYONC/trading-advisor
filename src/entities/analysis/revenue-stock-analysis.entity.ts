@@ -13,15 +13,26 @@ export class RevenueStockAnalysis extends BaseEntity {
 	@Column({ comment: '기간' })
 	period!: number;
 
-	@Column({ comment: '주가' })
+	@Column({ comment: '주가', type: 'decimal', precision: 16, scale: 2 })
 	price!: number;
 
-	@Column({ comment: 'P/S(FWD)' })
+	@Column({ comment: 'P/S(FWD)', type: 'decimal', precision: 6, scale: 4 })
 	ps!: number;
 
-	@Column({ comment: 'Operating Margin' })
+	@Column({
+		comment: 'Operating Margin',
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	operatingMargin!: number;
 
-	@Column({ comment: 'Sales Growth 조정 비율', nullable: true })
+	@Column({
+		comment: 'Sales Growth 조정 비율',
+		nullable: true,
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	salesGrowthAdjustedRate?: number;
 }

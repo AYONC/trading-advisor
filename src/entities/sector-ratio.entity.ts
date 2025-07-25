@@ -13,15 +13,30 @@ export class SectorRatio extends BaseEntity {
 	@Column({ comment: '기간' })
 	period!: number;
 
-	@Column({ comment: 'Sector ROA' })
+	@Column({ comment: 'Sector ROA', type: 'decimal', precision: 6, scale: 4 })
 	roa!: number;
 
-	@Column({ comment: 'Sector PEG Ratio' })
+	@Column({
+		comment: 'Sector PEG Ratio',
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	pegRatio!: number;
 
-	@Column({ comment: 'Sector PSG Ratio' })
+	@Column({
+		comment: 'Sector PSG Ratio',
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	psgRatio!: number;
 
-	@Column({ comment: 'Sector Operating Margin' })
+	@Column({
+		comment: 'Sector Operating Margin',
+		type: 'decimal',
+		precision: 6,
+		scale: 4,
+	})
 	operatingMargin!: number;
 }
