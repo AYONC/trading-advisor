@@ -20,7 +20,7 @@ export const getConfig = (): DataSourceOptions => {
 		namingStrategy: new SnakeNamingStrategy(),
 		migrations: [`${__dirname}/../migrations/*.{ts,js}`],
 		synchronize: process.env.NODE_ENV === 'development',
-		logging: process.env.NODE_ENV === 'development',
+		logging: false,
 	};
 };
 

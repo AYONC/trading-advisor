@@ -7,7 +7,8 @@ export async function GET(
 	_request: NextRequest,
 	{ params }: { params: { week: string } },
 ) {
-	const weekNumber = parseInt(params.week);
+	const { week } = await params;
+	const weekNumber = parseInt(week);
 
 	try {
 		const dataSource = await getDataSource();
@@ -17,19 +18,19 @@ export async function GET(
         (last_snapshot.cash_balance + 
          COALESCE(sell_trades.sell_amount, 0) - 
          COALESCE(buy_trades.buy_amount, 0)) as current_cash_balance
-      FROM weekly_snapshots last_snapshot
+      FROM weekly_snapshot last_snapshot
       LEFT JOIN (
         SELECT SUM(total_amount) as sell_amount
-        FROM trade_orders 
+        FROM trade_order 
         WHERE week_number = ? AND action = 'sell' AND status = 'completed'
       ) sell_trades ON 1=1
       LEFT JOIN (
         SELECT SUM(total_amount) as buy_amount
-        FROM trade_orders 
+        FROM trade_order 
         WHERE week_number = ? AND action = 'buy' AND status = 'completed'
       ) buy_trades ON 1=1
       WHERE last_snapshot.week_number = ?
-      ORDER BY last_snapshot.snapshot_id DESC 
+      ORDER BY last_snapshot.id DESC 
       LIMIT 1
     `;
 

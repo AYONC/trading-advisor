@@ -8,7 +8,9 @@ export async function GET(
 	_request: NextRequest,
 	{ params }: { params: { week: string } },
 ) {
-	const weekNumber = parseInt(params.week);
+	const { week } = await params;
+	console.log(week);
+	const weekNumber = parseInt(week);
 
 	try {
 		const dataSource = await getDataSource();
@@ -41,28 +43,28 @@ async function getCurrentPortfolio(dataSource: DataSource, weekNumber: number) {
        COALESCE(buy_trades.buy_shares, 0) - 
        COALESCE(sell_trades.sell_shares, 0)) as current_shares
     FROM (
-      SELECT DISTINCT ticker FROM snapshot_holdings sh
-      JOIN weekly_snapshots ws ON sh.snapshot_id = ws.snapshot_id
+      SELECT DISTINCT ticker FROM snapshot_holding sh
+      JOIN weekly_snapshot ws ON sh.id = ws.id
       WHERE ws.week_number = ?
       UNION
-      SELECT DISTINCT ticker FROM trade_orders
+      SELECT DISTINCT ticker FROM trade_order
       WHERE week_number = ? AND status = 'completed'
     ) tickers
     LEFT JOIN (
       SELECT sh.ticker, sh.shares
-      FROM snapshot_holdings sh
-      JOIN weekly_snapshots ws ON sh.snapshot_id = ws.snapshot_id  
+      FROM snapshot_holding sh
+      JOIN weekly_snapshot ws ON sh.id = ws.id  
       WHERE ws.week_number = ?
     ) last_holdings ON tickers.ticker = last_holdings.ticker
     LEFT JOIN (
       SELECT ticker, SUM(shares) as buy_shares
-      FROM trade_orders
+      FROM trade_order
       WHERE week_number = ? AND action = 'buy' AND status = 'completed'
       GROUP BY ticker
     ) buy_trades ON tickers.ticker = buy_trades.ticker
     LEFT JOIN (
       SELECT ticker, SUM(shares) as sell_shares  
-      FROM trade_orders
+      FROM trade_order
       WHERE week_number = ? AND action = 'sell' AND status = 'completed'
       GROUP BY ticker
     ) sell_trades ON tickers.ticker = sell_trades.ticker
