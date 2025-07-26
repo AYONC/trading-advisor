@@ -1,13 +1,11 @@
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import AnalyticsRoundedIcon from '@mui/icons-material/AnalyticsRounded';
-import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import BusinessIcon from '@mui/icons-material/Business';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
-import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import TimelineIcon from '@mui/icons-material/Timeline';
@@ -25,27 +23,29 @@ import * as React from 'react';
 const mainListItems = [
 	{ text: 'Home', icon: <HomeRoundedIcon />, href: '/' },
 	{ text: 'Market', icon: <TimelineIcon />, href: '/market' },
-	{ text: 'Clients', icon: <PeopleRoundedIcon />, href: '/clients' },
-	{ text: 'Tasks', icon: <AssignmentRoundedIcon />, href: '/tasks' },
 ];
 
 const basicDataItems = [
 	{ text: 'Sectors', icon: <BusinessIcon />, href: '/basic-data/sectors' },
 	{ text: 'Stocks', icon: <ShowChartIcon />, href: '/basic-data/stocks' },
+	{
+		text: 'Add Sector',
+		icon: <BusinessIcon />,
+		href: '/basic-data/add-sector',
+	},
+	{ text: 'Add Stock', icon: <AddBoxIcon />, href: '/basic-data/add-stock' },
 ];
 
 const analysisItems = [
-	{ text: 'Add Sector', icon: <BusinessIcon />, href: '/analysis/add-sector' },
-	{ text: 'Add Stock', icon: <AddBoxIcon />, href: '/analysis/add-stock' },
 	{
 		text: 'Add Earning Analysis',
 		icon: <TrendingUpIcon />,
 		href: '/analysis/earning/add',
 	},
 	{
-		text: 'Add Analysis',
+		text: 'Add Revenue Analysis',
 		icon: <TrendingUpIcon />,
-		href: '/analysis/add-analysis',
+		href: '/analysis/revenue/add',
 	},
 ];
 
@@ -87,7 +87,11 @@ export default function MenuContent() {
 							onClick={() => handleNavigation(item.href)}
 						>
 							<ListItemIcon>{item.icon}</ListItemIcon>
-							<ListItemText primary={item.text} />
+							<ListItemText
+								primary={item.text}
+								disableTypography
+								sx={{ fontWeight: 'bold', fontSize: '14px' }}
+							/>
 						</ListItemButton>
 					</ListItem>
 				))}
@@ -98,8 +102,12 @@ export default function MenuContent() {
 						<ListItemIcon>
 							<InfoRoundedIcon />
 						</ListItemIcon>
-						<ListItemText primary="Basic Data" />
-						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
+						<ListItemText
+							primary="Basic Data"
+							disableTypography
+							sx={{ fontWeight: 'bold', fontSize: '14px' }}
+						/>
+						{basicDataOpen ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 				</ListItem>
 				<Collapse in={basicDataOpen} timeout="auto" unmountOnExit>
@@ -107,12 +115,16 @@ export default function MenuContent() {
 						{basicDataItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
 								<ListItemButton
-									sx={{ ml: 4 }}
+									sx={{ ml: 1 }}
 									selected={item.href === pathname}
 									onClick={() => handleNavigation(item.href)}
 								>
 									<ListItemIcon>{item.icon}</ListItemIcon>
-									<ListItemText primary={item.text} />
+									<ListItemText
+										primary={item.text}
+										sx={{ fontSize: '12px', fontWeight: 'bold' }}
+										disableTypography
+									/>
 								</ListItemButton>
 							</ListItem>
 						))}
@@ -125,7 +137,11 @@ export default function MenuContent() {
 						<ListItemIcon>
 							<AnalyticsRoundedIcon />
 						</ListItemIcon>
-						<ListItemText primary="Analysis" />
+						<ListItemText
+							primary="Analysis"
+							disableTypography
+							sx={{ fontWeight: 'bold', fontSize: '14px' }}
+						/>
 						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 				</ListItem>
@@ -134,12 +150,16 @@ export default function MenuContent() {
 						{analysisItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
 								<ListItemButton
-									sx={{ ml: 4 }}
+									sx={{ ml: 1 }}
 									selected={item.href === pathname}
 									onClick={() => handleNavigation(item.href)}
 								>
 									<ListItemIcon>{item.icon}</ListItemIcon>
-									<ListItemText primary={item.text} />
+									<ListItemText
+										primary={item.text}
+										disableTypography
+										sx={{ fontSize: '12px', fontWeight: 'bold' }}
+									/>
 								</ListItemButton>
 							</ListItem>
 						))}
