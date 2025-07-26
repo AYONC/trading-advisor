@@ -21,6 +21,12 @@ export const getConfig = (): DataSourceOptions => {
 		migrations: [`${__dirname}/../migrations/*.{ts,js}`],
 		synchronize: process.env.NODE_ENV === 'development',
 		logging: false,
+		timezone: 'Z', // UTC로 고정하여 이중 변환 방지
+		extra: {
+			connectionLimit: 10,
+			// MySQL 연결 시 UTC timezone 명시적 설정
+			timezone: '+00:00',
+		},
 	};
 };
 

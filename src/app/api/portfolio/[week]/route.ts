@@ -1,7 +1,6 @@
 'use server';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { DataSource } from 'typeorm';
-import { WeeklySnapshot } from '@/entities/weekly-snapshot.entity';
 import { getDataSource } from '@/lib/db';
 
 export async function GET(
@@ -22,12 +21,7 @@ export async function GET(
 			return NextResponse.json(portfolio);
 		} else {
 			// 과거 주차: 스냅샷 조회
-			const snapshotRepo = dataSource.getRepository(WeeklySnapshot);
-			const snapshot = await snapshotRepo.findOne({
-				where: { weekNumber: weekNumber },
-				relations: ['holdings'],
-			});
-			return NextResponse.json(snapshot);
+			return NextResponse.json({});
 		}
 	} catch (error) {
 		console.error(error);

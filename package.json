@@ -30,9 +30,11 @@
 		"next": "15.4.3",
 		"react": "19.1.0",
 		"react-dom": "19.1.0",
+		"recharts": "^3.1.0",
 		"reflect-metadata": "^0.2.2",
 		"typeorm": "^0.3.25",
-		"typeorm-naming-strategies": "^4.1.0"
+		"typeorm-naming-strategies": "^4.1.0",
+		"yahoo-finance2": "^2.13.3"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",

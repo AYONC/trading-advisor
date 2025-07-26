@@ -14,7 +14,10 @@ export class TradeOrder extends BaseEntity {
 	@RelationId<TradeOrder>((it) => it.stock)
 	stockId!: number;
 
-	@Column()
+	@Column({
+		type: 'varchar',
+		comment: '거래 유형 (buy/sell)',
+	})
 	action!: TradeAction;
 
 	@Column({ type: 'decimal', precision: 6, scale: 2 })

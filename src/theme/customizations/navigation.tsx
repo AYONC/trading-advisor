@@ -67,7 +67,6 @@ export const navigationCustomizations: Components<Theme> = {
 		styleOverrides: {
 			root: ({ theme }) => ({
 				borderRadius: (theme.vars || theme).shape.borderRadius,
-				border: '1px solid',
 				borderColor: gray[200],
 				backgroundColor: (theme.vars || theme).palette.background.paper,
 				boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
