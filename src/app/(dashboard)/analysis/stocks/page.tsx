@@ -5,21 +5,12 @@ import {
 	TrendingUp as StockIcon,
 	Tag as TagIcon,
 } from '@mui/icons-material';
+import { Alert, Box, Chip, Container, Paper, Typography } from '@mui/material';
 import {
-	Alert,
-	Box,
-	Chip,
-	CircularProgress,
-	Container,
-	Paper,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-	Typography,
-} from '@mui/material';
+	DataGrid,
+	type GridColDef,
+	type GridRowParams,
+} from '@mui/x-data-grid';
 import { useCallback, useEffect, useState } from 'react';
 import { formatDateTime } from '@/utils/date';
 
@@ -35,6 +26,104 @@ interface Stock {
 	createdAt: string;
 	updatedAt: string;
 }
+
+const columns: GridColDef[] = [
+	{
+		field: 'id',
+		headerName: 'ID',
+		width: 80,
+		renderHeader: () => (
+			<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+				<TagIcon fontSize="small" />
+				ID
+			</Box>
+		),
+		renderCell: (params) => (
+			<Typography
+				variant="body2"
+				sx={{
+					fontFamily: 'monospace',
+					color: 'text.secondary',
+					fontWeight: 'medium',
+				}}
+			>
+				#{params.value}
+			</Typography>
+		),
+	},
+	{
+		field: 'ticker',
+		headerName: 'Ticker',
+		width: 120,
+		renderHeader: () => (
+			<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+				<StockIcon fontSize="small" />
+				Ticker
+			</Box>
+		),
+		renderCell: (params) => (
+			<Chip
+				label={params.value}
+				variant="outlined"
+				color="primary"
+				sx={{
+					fontFamily: 'monospace',
+					fontWeight: 'bold',
+				}}
+			/>
+		),
+	},
+	{
+		field: 'companyName',
+		headerName: 'Company Name',
+		flex: 1,
+		minWidth: 200,
+		renderCell: (params) => (
+			<Typography variant="body2" fontWeight="medium">
+				{params.value}
+			</Typography>
+		),
+	},
+	{
+		field: 'sectorName',
+		headerName: 'Sector',
+		width: 150,
+		renderHeader: () => (
+			<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+				<BusinessIcon fontSize="small" />
+				Sector
+			</Box>
+		),
+		renderCell: (params) => (
+			<Chip
+				label={params.value}
+				variant="filled"
+				color="secondary"
+				size="small"
+				sx={{
+					fontFamily: 'monospace',
+					fontWeight: 'bold',
+				}}
+			/>
+		),
+	},
+	{
+		field: 'createdAt',
+		headerName: 'Created',
+		width: 200,
+		align: 'center',
+		headerAlign: 'center',
+		renderCell: (params) => formatDateTime(params.value),
+	},
+	{
+		field: 'updatedAt',
+		headerName: 'Updated',
+		width: 200,
+		align: 'center',
+		headerAlign: 'center',
+		renderCell: (params) => formatDateTime(params.value),
+	},
+];
 
 export default function StocksPage() {
 	const [stocks, setStocks] = useState<Stock[]>([]);
@@ -61,16 +150,23 @@ export default function StocksPage() {
 		}
 	}, []);
 
-	const handleStockClick = (ticker: string) => {
+	const handleRowClick = (params: GridRowParams) => {
+		const ticker = params.row.ticker;
 		window.open(`https://finance.yahoo.com/quote/${ticker}`, '_blank');
 	};
+
+	// Transform stocks data for DataGrid
+	const rows = stocks.map((stock) => ({
+		...stock,
+		sectorName: stock.sector.name,
+	}));
 
 	useEffect(() => {
 		fetchStocks();
 	}, [fetchStocks]);
 
 	return (
-		<Container maxWidth="lg">
+		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
 				<Box
 					sx={{
@@ -98,112 +194,50 @@ export default function StocksPage() {
 				)}
 
 				<Paper elevation={2}>
-					{loading ? (
-						<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-							<CircularProgress />
-						</Box>
-					) : (
-						<TableContainer>
-							<Table>
-								<TableHead>
-									<TableRow>
-										<TableCell>
-											<Box
-												sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-											>
-												<TagIcon fontSize="small" />
-												ID
-											</Box>
-										</TableCell>
-										<TableCell>
-											<Box
-												sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-											>
-												<StockIcon fontSize="small" />
-												Ticker
-											</Box>
-										</TableCell>
-										<TableCell>Company Name</TableCell>
-										<TableCell>
-											<Box
-												sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-											>
-												<BusinessIcon fontSize="small" />
-												Sector
-											</Box>
-										</TableCell>
-										<TableCell>Created</TableCell>
-										<TableCell>Updated</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{stocks.length === 0 ? (
-										<TableRow>
-											<TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-												<Typography color="text.secondary">
-													No stocks found. Add stocks using the "Add Stock"
-													page!
-												</Typography>
-											</TableCell>
-										</TableRow>
-									) : (
-										stocks.map((stock) => (
-											<TableRow
-												key={stock.id}
-												hover
-												onClick={() => handleStockClick(stock.ticker)}
-												sx={{
-													cursor: 'pointer',
-													'&:hover': {
-														backgroundColor: 'action.hover',
-													},
-												}}
-											>
-												<TableCell>
-													<Typography
-														variant="body2"
-														sx={{
-															fontFamily: 'monospace',
-															color: 'text.secondary',
-															fontWeight: 'medium',
-														}}
-													>
-														#{stock.id}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													<Chip
-														label={stock.ticker}
-														variant="outlined"
-														color="primary"
-														sx={{
-															fontFamily: 'monospace',
-															fontWeight: 'bold',
-														}}
-													/>
-												</TableCell>
-												<TableCell>
-													<Typography variant="body2" fontWeight="medium">
-														{stock.companyName}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													<Chip
-														label={stock.sector.name}
-														variant="filled"
-														color="secondary"
-														size="small"
-													/>
-												</TableCell>
-												<TableCell>{formatDateTime(stock.createdAt)}</TableCell>
-												<TableCell>{formatDateTime(stock.updatedAt)}</TableCell>
-											</TableRow>
-										))
-									)}
-								</TableBody>
-							</Table>
-						</TableContainer>
-					)}
+					<Box sx={{ height: '100%', width: '100%' }}>
+						<DataGrid
+							rows={rows}
+							columns={columns}
+							loading={loading}
+							onRowClick={handleRowClick}
+							initialState={{
+								pagination: { paginationModel: { pageSize: 50 } },
+							}}
+							pageSizeOptions={[10, 25, 50, 100]}
+							density="standard"
+							disableRowSelectionOnClick
+							sx={{
+								'& .MuiDataGrid-row': {
+									cursor: 'pointer',
+									'&:hover': {
+										backgroundColor: 'action.hover',
+									},
+								},
+								'& .MuiDataGrid-cell:focus': {
+									outline: 'none',
+								},
+								'& .MuiDataGrid-row:focus': {
+									outline: 'none',
+								},
+							}}
+							slots={{
+								noRowsOverlay: () => (
+									<Box
+										sx={{
+											display: 'flex',
+											justifyContent: 'center',
+											alignItems: 'center',
+											height: '100%',
+										}}
+									>
+										<Typography color="text.secondary">
+											No stocks found. Add stocks using the "Add Stock" page!
+										</Typography>
+									</Box>
+								),
+							}}
+						/>
+					</Box>
 				</Paper>
 			</Box>
 		</Container>
