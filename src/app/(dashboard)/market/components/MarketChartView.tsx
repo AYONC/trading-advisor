@@ -197,6 +197,9 @@ export default function MarketChartView({
 													`$${value.toFixed(2)}`,
 													'Price',
 												]}
+												contentStyle={{
+													color: 'black',
+												}}
 											/>
 											<Line
 												type="monotone"

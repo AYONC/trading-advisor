@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Chip, Paper, Typography } from '@mui/material';
+import { Box, Chip, Paper, Typography, useTheme } from '@mui/material';
 import {
 	DataGrid,
 	type GridCellParams,
@@ -15,7 +15,6 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
-import { gray } from '@/theme/themePrimitives';
 import { formatPrice, getChangeColor, getChangeIcon } from './common';
 
 interface Stock {
@@ -200,7 +199,7 @@ function Chart7Day({ params }: { params: GridCellParams }) {
 	const lowPrice = Math.min(...historicalData.map((h) => h.close));
 
 	return (
-		<div className="flex flex-col items-center justify-center">
+		<div className="flex flex-col items-center justify-center gap-2">
 			<div className="flex flex-col items-center justify-center gap-0 w-full h-5">
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart data={stock.marketData.historical}>
@@ -227,7 +226,9 @@ function Chart7Day({ params }: { params: GridCellParams }) {
 							content={({ label, payload }) => {
 								return (
 									<div className="flex flex-col items-center justify-center border border-gray-300 rounded-md p-4 m-2 z-10 fixed bg-white">
-										<Typography variant="body2">{label}</Typography>
+										<Typography variant="body2" color="black">
+											{label}
+										</Typography>
 										<Typography
 											variant="body2"
 											fontWeight="bold"
@@ -274,7 +275,7 @@ export default function MarketTableView({
 	marketDataLoading,
 	onStockClick,
 }: MarketTableViewProps) {
-	// Custom render function for 7-day chart
+	const theme = useTheme();
 
 	// Convert stock data to DataGrid rows format
 	const rows: GridRowsProp = stocksWithMarketData.map((stock) => ({
@@ -294,7 +295,7 @@ export default function MarketTableView({
 			<DataGrid
 				rows={rows}
 				columns={columns}
-				rowHeight={100}
+				rowHeight={80}
 				initialState={{
 					pagination: {
 						paginationModel: { page: 0, pageSize: 50 },
@@ -311,7 +312,7 @@ export default function MarketTableView({
 					noRowsLabel: 'No stocks found. Add stocks to see market data!',
 				}}
 				sx={{
-					'--DataGrid-rowBorderColor': gray[200],
+					'--DataGrid-rowBorderColor': theme.palette.grey[200],
 					'& .MuiDataGrid-cell': {
 						display: 'flex',
 						alignItems: 'center',
