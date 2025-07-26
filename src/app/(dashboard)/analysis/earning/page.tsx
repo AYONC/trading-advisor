@@ -31,13 +31,14 @@ interface Stock {
 	};
 }
 
-interface RevenueAnalysis {
+interface EarningAnalysis {
 	id: number;
 	period: number;
 	price: number;
-	ps: number;
-	operatingMargin: number;
-	salesGrowthAdjustedRate?: number;
+	pe: number;
+	roa: number;
+	epsRevisionGrade: string;
+	epsGrowthAdjustedRate?: number;
 	createdAt: string;
 	updatedAt: string;
 	stock: Stock;
@@ -53,9 +54,17 @@ interface PaginationInfo {
 }
 
 interface ApiResponse {
-	data: RevenueAnalysis[];
+	data: EarningAnalysis[];
 	pagination: PaginationInfo;
 }
+
+const getGradeColor = (grade: string): string => {
+	if (grade.startsWith('A')) return '#4caf50'; // Green
+	if (grade.startsWith('B')) return '#ff9800'; // Orange
+	if (grade.startsWith('C')) return '#2196f3'; // Blue
+	if (grade.startsWith('D')) return '#ff5722'; // Deep Orange
+	return '#9e9e9e'; // Grey for E
+};
 
 const columns: GridColDef[] = [
 	{
@@ -89,11 +98,83 @@ const columns: GridColDef[] = [
 		field: 'stock.companyName',
 		headerName: 'Company Name',
 		flex: 1,
-		minWidth: 500,
+		minWidth: 400,
 		align: 'left',
 		headerAlign: 'left',
 		valueGetter: (_, row) => row.stock.companyName,
-		renderCell: (params) => params.row.stock.companyName,
+		renderCell: (params) => (
+			<p className={'text-sm font-medium'}>{params.row.stock.companyName}</p>
+		),
+	},
+	{
+		field: 'epsRevisionGrade',
+		headerName: 'EPS Revision Grade',
+		width: 140,
+		align: 'center',
+		headerAlign: 'center',
+		renderCell: (params) => (
+			<Chip
+				label={params.value}
+				size="medium"
+				sx={{
+					backgroundColor: getGradeColor(params.value),
+					border: 'none',
+					color: 'white',
+					fontWeight: 'bold',
+					minWidth: 40,
+					'& .MuiChip-label': {
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						color: 'white',
+						fontWeight: 'bold',
+						lineHeight: '1',
+						fontSize: '14px',
+					},
+				}}
+			/>
+		),
+	},
+	{
+		field: 'price',
+		headerName: 'Price',
+		width: 100,
+		align: 'center',
+		headerAlign: 'center',
+		type: 'number',
+		renderCell: (params) => (
+			<Typography variant="body2" fontWeight="medium">
+				${Number(params.value).toFixed(2)}
+			</Typography>
+		),
+	},
+	{
+		field: 'pe',
+		headerName: 'P/E (FWD)',
+		width: 100,
+		align: 'center',
+		headerAlign: 'center',
+		type: 'number',
+		renderCell: (params) => Number(params.value).toFixed(2),
+	},
+	{
+		field: 'roa',
+		headerName: 'ROA',
+		width: 100,
+		align: 'center',
+		headerAlign: 'center',
+		type: 'number',
+		renderCell: (params) => `${(Number(params.value) * 100).toFixed(2)}%`,
+	},
+	{
+		field: 'epsGrowthAdjustedRate',
+		headerName: 'EPS Growth Adj. Rate',
+		width: 140,
+		align: 'center',
+		headerAlign: 'center',
+		type: 'number',
+		renderCell: (params) =>
+			params.value ? `${(Number(params.value) * 100).toFixed(2)}%` : '-',
 	},
 	{
 		field: 'stock.sector.name',
@@ -118,47 +199,6 @@ const columns: GridColDef[] = [
 		},
 	},
 	{
-		field: 'price',
-		headerName: 'Price',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => (
-			<Typography variant="body2" fontWeight="medium">
-				${Number(params.value).toFixed(2)}
-			</Typography>
-		),
-	},
-	{
-		field: 'ps',
-		headerName: 'P/S (FWD)',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => Number(params.value).toFixed(2),
-	},
-	{
-		field: 'operatingMargin',
-		headerName: 'Operating Margin',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => `${(Number(params.value) * 100).toFixed(2)}%`,
-	},
-	{
-		field: 'salesGrowthAdjustedRate',
-		headerName: 'Sales Growth Adj. Rate',
-		width: 140,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) =>
-			params.value ? `${(Number(params.value) * 100).toFixed(2)}%` : '-',
-	},
-	{
 		field: 'createdAt',
 		headerName: 'Created',
 		width: 200,
@@ -168,8 +208,8 @@ const columns: GridColDef[] = [
 	},
 ];
 
-export default function RevenueAnalysisPage() {
-	const [analyses, setAnalyses] = useState<RevenueAnalysis[]>([]);
+export default function EarningAnalysisPage() {
+	const [analyses, setAnalyses] = useState<EarningAnalysis[]>([]);
 	console.log(analyses);
 	const [loading, setLoading] = useState(true);
 	const [pagination, setPagination] = useState<PaginationInfo>({
@@ -204,7 +244,7 @@ export default function RevenueAnalysisPage() {
 				params.append('period', period.trim());
 			}
 
-			const response = await fetch(`/api/revenue-analysis?${params}`);
+			const response = await fetch(`/api/earning-analysis?${params}`);
 
 			if (response.ok) {
 				const data: ApiResponse = await response.json();
@@ -215,11 +255,11 @@ export default function RevenueAnalysisPage() {
 					pageSize: data.pagination.limit,
 				});
 			} else {
-				setMessage({ type: 'error', text: 'Failed to load revenue analyses' });
+				setMessage({ type: 'error', text: 'Failed to load earning analyses' });
 			}
 		} catch (error) {
 			console.error('Error fetching analyses:', error);
-			setMessage({ type: 'error', text: 'Error loading revenue analyses' });
+			setMessage({ type: 'error', text: 'Error loading earning analyses' });
 		} finally {
 			setLoading(false);
 		}
@@ -257,10 +297,10 @@ export default function RevenueAnalysisPage() {
 			<Box sx={{ py: 4 }}>
 				<Box sx={{ mb: 4 }}>
 					<Typography variant="h4" component="h1" gutterBottom>
-						Revenue Stock Analysis
+						Earning Stock Analysis
 					</Typography>
 					<Typography variant="subtitle1" color="text.secondary">
-						View revenue analysis data with financial metrics. Click on any row
+						View earning analysis data with financial metrics. Click on any row
 						to view stock on Yahoo Finance.
 					</Typography>
 				</Box>
@@ -309,7 +349,7 @@ export default function RevenueAnalysisPage() {
 				{!loading && (
 					<Box sx={{ mb: 2 }}>
 						<Typography variant="body2" color="text.secondary">
-							Showing {analyses.length} of {pagination.totalItems} revenue
+							Showing {analyses.length} of {pagination.totalItems} earning
 							analyses
 							{searchPeriod && ` (filtered by period: ${searchPeriod})`}
 						</Typography>

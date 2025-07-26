@@ -232,14 +232,14 @@ export const getDesignTokens = (mode: PaletteMode) => {
 				fontWeight: 500,
 			},
 			body1: {
-				fontSize: defaultTheme.typography.pxToRem(14),
+				fontSize: defaultTheme.typography.pxToRem(12),
 			},
 			body2: {
-				fontSize: defaultTheme.typography.pxToRem(14),
+				fontSize: defaultTheme.typography.pxToRem(12),
 				fontWeight: 400,
 			},
 			caption: {
-				fontSize: defaultTheme.typography.pxToRem(12),
+				fontSize: defaultTheme.typography.pxToRem(10),
 				fontWeight: 400,
 			},
 		},
@@ -387,14 +387,14 @@ export const typography = {
 		fontSize: defaultTheme.typography.pxToRem(18),
 	},
 	subtitle2: {
-		fontSize: defaultTheme.typography.pxToRem(16),
+		fontSize: defaultTheme.typography.pxToRem(14),
 		fontWeight: 500,
 	},
 	body1: {
-		fontSize: defaultTheme.typography.pxToRem(16),
+		fontSize: defaultTheme.typography.pxToRem(14),
 	},
 	body2: {
-		fontSize: defaultTheme.typography.pxToRem(16),
+		fontSize: defaultTheme.typography.pxToRem(14),
 		fontWeight: 400,
 	},
 	caption: {

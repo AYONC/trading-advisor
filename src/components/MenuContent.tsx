@@ -38,6 +38,11 @@ const basicDataItems = [
 
 const analysisItems = [
 	{
+		text: 'Earning Analysis',
+		icon: <TrendingUpIcon />,
+		href: '/analysis/earning',
+	},
+	{
 		text: 'Revenue Analysis',
 		icon: <TrendingUpIcon />,
 		href: '/analysis/revenue',
