@@ -34,7 +34,7 @@ async function getStocks(): Promise<Stock[]> {
 
 function LoadingFallback() {
 	return (
-		<Container maxWidth="lg">
+		<Container maxWidth="xl">
 			<Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
 				<CircularProgress size={60} />
 			</Box>

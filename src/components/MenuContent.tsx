@@ -29,10 +29,19 @@ const mainListItems = [
 	{ text: 'Tasks', icon: <AssignmentRoundedIcon />, href: '/tasks' },
 ];
 
+const basicDataItems = [
+	{ text: 'Sectors', icon: <BusinessIcon />, href: '/basic-data/sectors' },
+	{ text: 'Stocks', icon: <ShowChartIcon />, href: '/basic-data/stocks' },
+];
+
 const analysisItems = [
-	{ text: 'Sectors', icon: <BusinessIcon />, href: '/analysis/sectors' },
-	{ text: 'Stocks', icon: <ShowChartIcon />, href: '/analysis/stocks' },
+	{ text: 'Add Sector', icon: <BusinessIcon />, href: '/analysis/add-sector' },
 	{ text: 'Add Stock', icon: <AddBoxIcon />, href: '/analysis/add-stock' },
+	{
+		text: 'Add Earning Analysis',
+		icon: <TrendingUpIcon />,
+		href: '/analysis/earning/add',
+	},
 	{
 		text: 'Add Analysis',
 		icon: <TrendingUpIcon />,
@@ -52,9 +61,16 @@ export default function MenuContent() {
 	const [analysisOpen, setAnalysisOpen] = React.useState(
 		pathname.startsWith('/analysis'),
 	);
+	const [basicDataOpen, setBasicDataOpen] = React.useState(
+		pathname.startsWith('/basic-data'),
+	);
 
 	const handleAnalysisClick = () => {
 		setAnalysisOpen(!analysisOpen);
+	};
+
+	const handleBasicDataClick = () => {
+		setBasicDataOpen(!basicDataOpen);
 	};
 
 	const handleNavigation = (href: string) => {
@@ -76,6 +92,33 @@ export default function MenuContent() {
 					</ListItem>
 				))}
 
+				{/* Basic Data Section */}
+				<ListItem disablePadding sx={{ display: 'block' }}>
+					<ListItemButton onClick={handleBasicDataClick}>
+						<ListItemIcon>
+							<InfoRoundedIcon />
+						</ListItemIcon>
+						<ListItemText primary="Basic Data" />
+						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
+					</ListItemButton>
+				</ListItem>
+				<Collapse in={basicDataOpen} timeout="auto" unmountOnExit>
+					<List component="div" disablePadding>
+						{basicDataItems.map((item) => (
+							<ListItem key={item.text} disablePadding>
+								<ListItemButton
+									sx={{ ml: 4 }}
+									selected={item.href === pathname}
+									onClick={() => handleNavigation(item.href)}
+								>
+									<ListItemIcon>{item.icon}</ListItemIcon>
+									<ListItemText primary={item.text} />
+								</ListItemButton>
+							</ListItem>
+						))}
+					</List>
+				</Collapse>
+
 				{/* Analysis Section */}
 				<ListItem disablePadding sx={{ display: 'block' }}>
 					<ListItemButton onClick={handleAnalysisClick}>
@@ -91,7 +134,7 @@ export default function MenuContent() {
 						{analysisItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
 								<ListItemButton
-									sx={{ pl: 4 }}
+									sx={{ ml: 4 }}
 									selected={item.href === pathname}
 									onClick={() => handleNavigation(item.href)}
 								>

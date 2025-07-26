@@ -248,6 +248,10 @@ export default function SectorsPage() {
 					variant="outlined"
 					color="primary"
 					size="small"
+					sx={{
+						fontFamily: 'monospace',
+						fontWeight: 'bold',
+					}}
 				/>
 			),
 		},
@@ -294,7 +298,7 @@ export default function SectorsPage() {
 	];
 
 	return (
-		<Container maxWidth="lg">
+		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
 				<Box
 					sx={{
@@ -328,15 +332,15 @@ export default function SectorsPage() {
 					</Alert>
 				)}
 
-				<Paper elevation={2} sx={{ height: 600, width: '100%' }}>
+				<Paper elevation={2} sx={{ height: '100%', width: '100%' }}>
 					<DataGrid
 						rows={sectors}
 						columns={columns}
 						loading={loading}
 						initialState={{
-							pagination: { paginationModel: { pageSize: 25 } },
+							pagination: { paginationModel: { pageSize: 50 } },
 						}}
-						pageSizeOptions={[10, 25, 50, 100]}
+						pageSizeOptions={[50, 100]}
 						disableRowSelectionOnClick
 						density="comfortable"
 						sx={{
