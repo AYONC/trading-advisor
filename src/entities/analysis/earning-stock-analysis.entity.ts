@@ -23,7 +23,7 @@ export class EarningStockAnalysis extends BaseEntity {
 	roa!: number; // 0.00 ~ 1.00
 
 	@Column({ comment: 'EPS Revision 등급' })
-	epsRevisionGrade!: string; // A, B, C, D, E
+	epsRevisionGrade!: string; // A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, E
 
 	@Column({
 		comment: 'EPS Growth 조정 비율',

@@ -39,10 +39,16 @@ export async function POST(request: NextRequest) {
 		}
 
 		// Validate EPS revision grade
-		const validGrades = ['A', 'B', 'C', 'D', 'E'];
+		const validGrades = [
+			'A+', 'A', 'A-', 
+			'B+', 'B', 'B-', 
+			'C+', 'C', 'C-', 
+			'D+', 'D', 'D-', 
+			'E'
+		];
 		if (!validGrades.includes(epsRevisionGrade)) {
 			return NextResponse.json(
-				{ error: 'Invalid EPS revision grade. Must be A, B, C, D, or E' },
+				{ error: 'Invalid EPS revision grade. Must be one of: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, E' },
 				{ status: 400 },
 			);
 		}

@@ -17,6 +17,7 @@ import {
 	Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
+import BulkUploadEarningAnalysis from '@/components/BulkUploadEarningAnalysis';
 
 interface Stock {
 	id: number;
@@ -39,10 +40,18 @@ interface FormData {
 }
 
 const EPS_REVISION_GRADES = [
+	{ value: 'A+', label: 'A+ (Excellent+)' },
 	{ value: 'A', label: 'A (Excellent)' },
+	{ value: 'A-', label: 'A- (Excellent-)' },
+	{ value: 'B+', label: 'B+ (Good+)' },
 	{ value: 'B', label: 'B (Good)' },
+	{ value: 'B-', label: 'B- (Good-)' },
+	{ value: 'C+', label: 'C+ (Average+)' },
 	{ value: 'C', label: 'C (Average)' },
+	{ value: 'C-', label: 'C- (Average-)' },
+	{ value: 'D+', label: 'D+ (Poor+)' },
 	{ value: 'D', label: 'D (Poor)' },
+	{ value: 'D-', label: 'D- (Poor-)' },
 	{ value: 'E', label: 'E (Very Poor)' },
 ];
 
@@ -196,6 +205,14 @@ export default function AddEarningAnalysisPage() {
 
 	const selectedStock = stocks.find((stock) => stock.id === formData.stockId);
 
+	const handleBulkUploadSuccess = (result: any) => {
+		setMessage({
+			type: 'success',
+			text: `Bulk upload completed: ${result.successCount} analyses added successfully!`,
+		});
+		// Optional: Refresh or update any data if needed
+	};
+
 	return (
 		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
@@ -205,6 +222,27 @@ export default function AddEarningAnalysisPage() {
 				<Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
 					Add financial analysis data for stock earning performance
 				</Typography>
+
+				{/* Bulk Upload Section */}
+				<Box sx={{ mb: 4 }}>
+					<BulkUploadEarningAnalysis onSuccess={handleBulkUploadSuccess} />
+				</Box>
+
+				{/* Divider */}
+				<Box sx={{ display: 'flex', alignItems: 'center', my: 4 }}>
+					<Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'divider' }} />
+					<Typography
+						variant="body2"
+						sx={{
+							px: 2,
+							color: 'text.secondary',
+							backgroundColor: 'background.paper',
+						}}
+					>
+						OR ADD SINGLE ANALYSIS
+					</Typography>
+					<Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'divider' }} />
+				</Box>
 
 				<Box
 					sx={{
