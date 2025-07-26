@@ -132,6 +132,15 @@ export default function AddEarningAnalysisPage() {
 		}
 
 		// Validate numeric ranges
+		if (formData.period < 0 || !Number.isInteger(Number(formData.period))) {
+			setMessage({
+				type: 'error',
+				text: 'Period must be an integer greater than or equal to 0',
+			});
+			setLoading(false);
+			return;
+		}
+
 		if (formData.pe < 0 || formData.pe > 1000) {
 			setMessage({
 				type: 'error',
@@ -304,12 +313,13 @@ export default function AddEarningAnalysisPage() {
 											fullWidth
 											label="Period"
 											type="number"
+											inputProps={{ min: '0', step: '1' }}
 											value={formData.period}
 											onChange={handleInputChange('period')}
-											placeholder="e.g., 2024"
+											placeholder="e.g., 1 or 2024"
 											required
 											disabled={loading}
-											helperText="Analysis period (e.g., year)"
+											helperText="Analysis period (integer ≥ 0)"
 											sx={{ flex: 1 }}
 										/>
 
@@ -489,7 +499,7 @@ export default function AddEarningAnalysisPage() {
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 									<Typography variant="body2">
-										<strong>Period:</strong> Analysis time period (e.g., year)
+										<strong>Period:</strong> Analysis period (integer ≥ 0)
 									</Typography>
 									<Typography variant="body2">
 										<strong>P/E Ratio:</strong> Price-to-Earnings ratio

@@ -22,9 +22,17 @@ export async function POST(request: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!stockId || !period || !price || !pe || !roa || !epsRevisionGrade) {
+		if (!stockId || period === undefined || !price || !pe || !roa || !epsRevisionGrade) {
 			return NextResponse.json(
 				{ error: 'Missing required fields' },
+				{ status: 400 },
+			);
+		}
+
+		// Validate period
+		if (period < 0 || !Number.isInteger(period)) {
+			return NextResponse.json(
+				{ error: 'Period must be an integer greater than or equal to 0' },
 				{ status: 400 },
 			);
 		}

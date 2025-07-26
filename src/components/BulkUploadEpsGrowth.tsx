@@ -32,14 +32,11 @@ import Papa from 'papaparse';
 import { useCallback, useState } from 'react';
 import * as XLSX from 'xlsx';
 
-interface BulkAnalysisData {
+interface BulkEpsGrowthData {
 	ticker: string;
 	period: number;
-	price: number;
-	pe: number;
-	roa: number;
-	epsRevisionGrade: string;
-	epsGrowthAdjustedRate?: number;
+	year: number;
+	value: number;
 }
 
 interface ValidationError {
@@ -50,9 +47,9 @@ interface ValidationError {
 }
 
 interface BulkResult {
-	success: BulkAnalysisData[];
+	success: BulkEpsGrowthData[];
 	errors: Array<{
-		data: BulkAnalysisData;
+		data: BulkEpsGrowthData;
 		error: string;
 	}>;
 	total: number;
@@ -72,25 +69,17 @@ const VisuallyHiddenInput = styled('input')({
 	width: 1,
 });
 
-const EXPECTED_HEADERS = [
-	'ticker',
-	'period',
-	'price',
-	'pe',
-	'roa',
-	'epsRevisionGrade',
-	'epsGrowthAdjustedRate',
-];
+const EXPECTED_HEADERS = ['ticker', 'period', 'year', 'value'];
 
-interface BulkUploadEarningAnalysisProps {
+interface BulkUploadEpsGrowthProps {
 	onSuccess?: (result: BulkResult) => void;
 }
 
-export default function BulkUploadEarningAnalysis({
+export default function BulkUploadEpsGrowth({
 	onSuccess,
-}: BulkUploadEarningAnalysisProps) {
+}: BulkUploadEpsGrowthProps) {
 	const [file, setFile] = useState<File | null>(null);
-	const [parsedData, setParsedData] = useState<BulkAnalysisData[]>([]);
+	const [parsedData, setParsedData] = useState<BulkEpsGrowthData[]>([]);
 	const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
 		[],
 	);
@@ -101,21 +90,6 @@ export default function BulkUploadEarningAnalysis({
 
 	const validateData = useCallback((data: any[]): ValidationError[] => {
 		const errors: ValidationError[] = [];
-		const validGrades = [
-			'A+',
-			'A',
-			'A-',
-			'B+',
-			'B',
-			'B-',
-			'C+',
-			'C',
-			'C-',
-			'D+',
-			'D',
-			'D-',
-			'E',
-		];
 
 		data.forEach((row, index) => {
 			// Check required fields
@@ -137,43 +111,21 @@ export default function BulkUploadEarningAnalysis({
 				});
 			}
 
-			if (row.price === undefined || isNaN(Number(row.price))) {
+			if (!row.year || isNaN(Number(row.year))) {
 				errors.push({
 					row: index + 1,
-					field: 'price',
-					value: row.price,
-					error: 'Price is required and must be a number',
+					field: 'year',
+					value: row.year,
+					error: 'Year is required and must be a number',
 				});
 			}
 
-			if (row.pe === undefined || isNaN(Number(row.pe))) {
+			if (row.value === undefined || isNaN(Number(row.value))) {
 				errors.push({
 					row: index + 1,
-					field: 'pe',
-					value: row.pe,
-					error: 'P/E is required and must be a number',
-				});
-			}
-
-			if (row.roa === undefined || isNaN(Number(row.roa))) {
-				errors.push({
-					row: index + 1,
-					field: 'roa',
-					value: row.roa,
-					error: 'ROA is required and must be a number',
-				});
-			}
-
-			if (
-				!row.epsRevisionGrade ||
-				!validGrades.includes(row.epsRevisionGrade)
-			) {
-				errors.push({
-					row: index + 1,
-					field: 'epsRevisionGrade',
-					value: row.epsRevisionGrade,
-					error:
-						'EPS Revision Grade must be one of: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, E',
+					field: 'value',
+					value: row.value,
+					error: 'Value is required and must be a number',
 				});
 			}
 
@@ -191,40 +143,26 @@ export default function BulkUploadEarningAnalysis({
 			}
 
 			if (
-				row.pe !== undefined &&
-				(Number(row.pe) < 0 || Number(row.pe) > 1000)
+				row.year !== undefined &&
+				(Number(row.year) < 1900 || Number(row.year) > 2100)
 			) {
 				errors.push({
 					row: index + 1,
-					field: 'pe',
-					value: row.pe,
-					error: 'P/E ratio must be between 0 and 1000',
+					field: 'year',
+					value: row.year,
+					error: 'Year must be between 1900 and 2100',
 				});
 			}
 
 			if (
-				row.roa !== undefined &&
-				(Number(row.roa) < 0 || Number(row.roa) > 1)
+				row.value !== undefined &&
+				(Number(row.value) < -10 || Number(row.value) > 10)
 			) {
 				errors.push({
 					row: index + 1,
-					field: 'roa',
-					value: row.roa,
-					error: 'ROA must be between 0 and 1',
-				});
-			}
-
-			// Validate optional field
-			if (
-				row.epsGrowthAdjustedRate !== undefined &&
-				row.epsGrowthAdjustedRate !== '' &&
-				isNaN(Number(row.epsGrowthAdjustedRate))
-			) {
-				errors.push({
-					row: index + 1,
-					field: 'epsGrowthAdjustedRate',
-					value: row.epsGrowthAdjustedRate,
-					error: 'EPS Growth Adjusted Rate must be a number if provided',
+					field: 'value',
+					value: row.value,
+					error: 'Value must be between -10 and 10',
 				});
 			}
 		});
@@ -246,16 +184,11 @@ export default function BulkUploadEarningAnalysis({
 						setValidationErrors(errors);
 
 						if (errors.length === 0) {
-							const processedData: BulkAnalysisData[] = data.map((row) => ({
+							const processedData: BulkEpsGrowthData[] = data.map((row) => ({
 								ticker: String(row.ticker).toUpperCase(),
 								period: Number(row.period),
-								price: Number(row.price),
-								pe: Number(row.pe),
-								roa: Number(row.roa),
-								epsRevisionGrade: String(row.epsRevisionGrade).toUpperCase(),
-								epsGrowthAdjustedRate: row.epsGrowthAdjustedRate
-									? Number(row.epsGrowthAdjustedRate)
-									: undefined,
+								year: Number(row.year),
+								value: Number(row.value),
 							}));
 							setParsedData(processedData);
 						}
@@ -286,29 +219,12 @@ export default function BulkUploadEarningAnalysis({
 						setValidationErrors(errors);
 
 						if (errors.length === 0) {
-							const processedData: BulkAnalysisData[] = jsonData.map(
+							const processedData: BulkEpsGrowthData[] = jsonData.map(
 								(row: any) => ({
 									ticker: String(row.ticker || row.Ticker || '').toUpperCase(),
 									period: Number(row.period || row.Period),
-									price: Number(row.price || row.Price),
-									pe: Number(row.pe || row.PE || row['P/E']),
-									roa: Number(row.roa || row.ROA),
-									epsRevisionGrade: String(
-										row.epsRevisionGrade ||
-											row.EpsRevisionGrade ||
-											row['EPS Revision Grade'] ||
-											'',
-									).toUpperCase(),
-									epsGrowthAdjustedRate:
-										row.epsGrowthAdjustedRate ||
-										row.EpsGrowthAdjustedRate ||
-										row['EPS Growth Adjusted Rate']
-											? Number(
-													row.epsGrowthAdjustedRate ||
-														row.EpsGrowthAdjustedRate ||
-														row['EPS Growth Adjusted Rate'],
-												)
-											: undefined,
+									year: Number(row.year || row.Year),
+									value: Number(row.value || row.Value),
 								}),
 							);
 							setParsedData(processedData);
@@ -356,7 +272,7 @@ export default function BulkUploadEarningAnalysis({
 
 		setUploading(true);
 		try {
-			const response = await fetch('/api/earning-analysis/bulk', {
+			const response = await fetch('/api/eps-growth/bulk', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -376,7 +292,7 @@ export default function BulkUploadEarningAnalysis({
 			setUploadResult({
 				success: [],
 				errors: [
-					{ data: {} as BulkAnalysisData, error: 'Network error occurred' },
+					{ data: {} as BulkEpsGrowthData, error: 'Network error occurred' },
 				],
 				total: parsedData.length,
 				successCount: 0,
@@ -393,20 +309,14 @@ export default function BulkUploadEarningAnalysis({
 			{
 				ticker: 'AAPL',
 				period: 1,
-				price: 150.25,
-				pe: 25.4,
-				roa: 0.15,
-				epsRevisionGrade: 'A+',
-				epsGrowthAdjustedRate: 0.05,
+				year: 2024,
+				value: 0.15,
 			},
 			{
 				ticker: 'GOOGL',
 				period: 2,
-				price: 2800.5,
-				pe: 22.1,
-				roa: 0.12,
-				epsRevisionGrade: 'B-',
-				epsGrowthAdjustedRate: '',
+				year: 2025,
+				value: 0.12,
 			},
 		];
 
@@ -414,7 +324,7 @@ export default function BulkUploadEarningAnalysis({
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 		const link = document.createElement('a');
 		link.href = URL.createObjectURL(blob);
-		link.download = 'earning_analysis_template.csv';
+		link.download = 'eps_growth_template.csv';
 		link.click();
 	};
 
@@ -423,10 +333,10 @@ export default function BulkUploadEarningAnalysis({
 			<CardContent>
 				<Box sx={{ mb: 3 }}>
 					<Typography variant="h6" gutterBottom>
-						Bulk Upload Earning Analysis
+						Bulk Upload EPS Growth
 					</Typography>
 					<Typography variant="body2" color="text.secondary">
-						Upload CSV or Excel files to create multiple earning analyses at
+						Upload CSV or Excel files to create multiple EPS growth records at
 						once
 					</Typography>
 				</Box>
@@ -496,7 +406,7 @@ export default function BulkUploadEarningAnalysis({
 						<Alert severity="success" sx={{ mb: 2 }}>
 							<Typography variant="subtitle2">
 								✅ Data validated successfully! Ready to upload{' '}
-								{parsedData.length} analyses.
+								{parsedData.length} records.
 							</Typography>
 						</Alert>
 
@@ -519,7 +429,7 @@ export default function BulkUploadEarningAnalysis({
 						>
 							{uploading
 								? 'Uploading...'
-								: `Upload ${parsedData.length} Analyses`}
+								: `Upload ${parsedData.length} Records`}
 						</Button>
 					</Box>
 				)}
@@ -546,20 +456,19 @@ export default function BulkUploadEarningAnalysis({
 								</TableHead>
 								<TableBody>
 									{parsedData.slice(0, 20).map((row, index) => (
-										<TableRow key={`${row.ticker}-${row.period}-${index}`}>
+										<TableRow
+											key={`${row.ticker}-${row.period}-${row.year}-${index}`}
+										>
 											<TableCell>{row.ticker}</TableCell>
 											<TableCell>{row.period}</TableCell>
-											<TableCell>{row.price}</TableCell>
-											<TableCell>{row.pe}</TableCell>
-											<TableCell>{row.roa}</TableCell>
-											<TableCell>{row.epsRevisionGrade}</TableCell>
-											<TableCell>{row.epsGrowthAdjustedRate || '-'}</TableCell>
+											<TableCell>{row.year}</TableCell>
+											<TableCell>{row.value}</TableCell>
 										</TableRow>
 									))}
 									{parsedData.length > 20 && (
 										<TableRow>
 											<TableCell
-												colSpan={7}
+												colSpan={4}
 												align="center"
 												sx={{ fontStyle: 'italic' }}
 											>
@@ -617,12 +526,13 @@ export default function BulkUploadEarningAnalysis({
 											{uploadResult.errors.map((error, index) => (
 												<Alert
 													severity="error"
-													key={`error-${error.data.ticker || 'unknown'}-${error.data.period || 0}-${index}`}
+													key={`error-${error.data.ticker || 'unknown'}-${error.data.period || 0}-${error.data.year || 0}-${index}`}
 													sx={{ mb: 1 }}
 												>
 													<Typography variant="body2">
 														<strong>{error.data.ticker}</strong> (Period:{' '}
-														{error.data.period}): {error.error}
+														{error.data.period}, Year: {error.data.year}):{' '}
+														{error.error}
 													</Typography>
 												</Alert>
 											))}

@@ -1,21 +1,19 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { RevenueStockAnalysis } from '@/entities/analysis/revenue-stock-analysis.entity';
+import { EpsGrowth } from '@/entities/analysis/eps-growth.entity';
 import { Stock } from '@/entities/stock.entity';
 import { getDataSource } from '@/lib/db';
 
-interface BulkRevenueAnalysisData {
+interface BulkEpsGrowthData {
 	ticker: string;
 	period: number;
-	price: number;
-	ps: number;
-	operatingMargin: number;
-	salesGrowthAdjustedRate?: number;
+	year: number;
+	value: number;
 }
 
 interface BulkResult {
-	success: BulkRevenueAnalysisData[];
+	success: BulkEpsGrowthData[];
 	errors: Array<{
-		data: BulkRevenueAnalysisData;
+		data: BulkEpsGrowthData;
 		error: string;
 	}>;
 	total: number;
@@ -25,7 +23,7 @@ interface BulkResult {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { analyses }: { analyses: BulkRevenueAnalysisData[] } =
+		const { analyses }: { analyses: BulkEpsGrowthData[] } =
 			await request.json();
 
 		if (!analyses || !Array.isArray(analyses) || analyses.length === 0) {
@@ -36,8 +34,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const dataSource = await getDataSource();
-		const revenueAnalysisRepository =
-			dataSource.getRepository(RevenueStockAnalysis);
+		const epsGrowthRepository = dataSource.getRepository(EpsGrowth);
 		const stockRepository = dataSource.getRepository(Stock);
 
 		// Get all stocks for ticker lookup
@@ -60,24 +57,13 @@ export async function POST(request: NextRequest) {
 				// Validate required fields
 				if (
 					!analysisData.ticker ||
-					analysisData.period === undefined ||
-					analysisData.price === undefined ||
-					analysisData.ps === undefined ||
-					analysisData.operatingMargin === undefined
+					!analysisData.period ||
+					!analysisData.year ||
+					analysisData.value === undefined
 				) {
 					result.errors.push({
 						data: analysisData,
-						error:
-							'Missing required fields (ticker, period, price, ps, operatingMargin)',
-					});
-					continue;
-				}
-
-				// Validate period
-				if (analysisData.period < 0 || !Number.isInteger(analysisData.period)) {
-					result.errors.push({
-						data: analysisData,
-						error: 'Period must be an integer greater than or equal to 0',
+						error: 'Missing required fields (ticker, period, year, value)',
 					});
 					continue;
 				}
@@ -93,74 +79,56 @@ export async function POST(request: NextRequest) {
 				}
 
 				// Validate numeric ranges
-				if (analysisData.price < 0) {
+				if (analysisData.period < 0 || !Number.isInteger(analysisData.period)) {
 					result.errors.push({
 						data: analysisData,
-						error: 'Price must be positive',
+						error: 'Period must be an integer greater than or equal to 0',
 					});
 					continue;
 				}
 
-				if (analysisData.ps < 0) {
+				if (analysisData.year < 1900 || analysisData.year > 2100) {
 					result.errors.push({
 						data: analysisData,
-						error: 'P/S ratio must be positive',
+						error: 'Year must be between 1900 and 2100',
 					});
 					continue;
 				}
 
-				if (
-					analysisData.operatingMargin < -1 ||
-					analysisData.operatingMargin > 1
-				) {
+				if (analysisData.value < -10 || analysisData.value > 10) {
 					result.errors.push({
 						data: analysisData,
-						error: 'Operating Margin must be between -1 and 1',
+						error: 'Value must be between -10 and 10',
 					});
 					continue;
 				}
 
-				if (
-					analysisData.salesGrowthAdjustedRate !== undefined &&
-					(analysisData.salesGrowthAdjustedRate < -1 ||
-						analysisData.salesGrowthAdjustedRate > 10)
-				) {
-					result.errors.push({
-						data: analysisData,
-						error: 'Sales Growth Adjusted Rate must be between -1 and 10',
-					});
-					continue;
-				}
-
-				// Check for duplicate analysis for the same stock and period
-				const existingAnalysis = await revenueAnalysisRepository.findOne({
+				// Check for duplicate analysis for the same stock, period, and year
+				const existingGrowth = await epsGrowthRepository.findOne({
 					where: {
 						stockId: stock.id,
 						period: analysisData.period,
+						year: analysisData.year,
 					},
 				});
 
-				if (existingAnalysis) {
+				if (existingGrowth) {
 					result.errors.push({
 						data: analysisData,
-						error: `Revenue analysis for ${analysisData.ticker} in period ${analysisData.period} already exists`,
+						error: `EPS Growth for ${analysisData.ticker} in period ${analysisData.period}, year ${analysisData.year} already exists`,
 					});
 					continue;
 				}
 
-				// Create and save the analysis
-				const revenueAnalysis = revenueAnalysisRepository.create({
+				// Create and save the growth data
+				const epsGrowth = epsGrowthRepository.create({
 					stock: { id: stock.id },
 					period: analysisData.period,
-					price: analysisData.price,
-					ps: analysisData.ps,
-					operatingMargin: analysisData.operatingMargin,
-					...(analysisData.salesGrowthAdjustedRate !== undefined && {
-						salesGrowthAdjustedRate: analysisData.salesGrowthAdjustedRate,
-					}),
+					year: analysisData.year,
+					value: analysisData.value,
 				});
 
-				await revenueAnalysisRepository.save(revenueAnalysis);
+				await epsGrowthRepository.save(epsGrowth);
 
 				result.success.push(analysisData);
 				result.successCount++;
@@ -178,7 +146,7 @@ export async function POST(request: NextRequest) {
 			status: result.errorCount > 0 ? 207 : 201, // 207 Multi-Status if there are partial errors
 		});
 	} catch (error) {
-		console.error('Error in bulk revenue analysis creation:', error);
+		console.error('Error in bulk EPS Growth creation:', error);
 		return NextResponse.json(
 			{ error: 'Internal server error' },
 			{ status: 500 },

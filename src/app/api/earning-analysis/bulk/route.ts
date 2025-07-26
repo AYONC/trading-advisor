@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 				// Validate required fields
 				if (
 					!analysisData.ticker ||
-					!analysisData.period ||
+					analysisData.period === undefined ||
 					analysisData.price === undefined ||
 					analysisData.pe === undefined ||
 					analysisData.roa === undefined ||
@@ -85,6 +85,15 @@ export async function POST(request: NextRequest) {
 						data: analysisData,
 						error:
 							'Missing required fields (ticker, period, price, pe, roa, epsRevisionGrade)',
+					});
+					continue;
+				}
+
+				// Validate period
+				if (analysisData.period < 0 || !Number.isInteger(analysisData.period)) {
+					result.errors.push({
+						data: analysisData,
+						error: 'Period must be an integer greater than or equal to 0',
 					});
 					continue;
 				}

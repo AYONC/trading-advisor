@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 		// Validate required fields
 		if (
 			!stockId ||
-			!period ||
+			period === undefined ||
 			price === undefined ||
 			ps === undefined ||
 			operatingMargin === undefined
@@ -33,6 +33,14 @@ export async function POST(request: NextRequest) {
 					error:
 						'Missing required fields (stockId, period, price, ps, operatingMargin)',
 				},
+				{ status: 400 },
+			);
+		}
+
+		// Validate period
+		if (period < 0 || !Number.isInteger(period)) {
+			return NextResponse.json(
+				{ error: 'Period must be an integer greater than or equal to 0' },
 				{ status: 400 },
 			);
 		}

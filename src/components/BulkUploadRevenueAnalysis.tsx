@@ -151,6 +151,18 @@ export default function BulkUploadRevenueAnalysis({
 			}
 
 			// Validate ranges
+			if (
+				row.period !== undefined &&
+				(Number(row.period) < 0 || !Number.isInteger(Number(row.period)))
+			) {
+				errors.push({
+					row: index + 1,
+					field: 'period',
+					value: row.period,
+					error: 'Period must be an integer greater than or equal to 0',
+				});
+			}
+
 			if (row.price !== undefined && Number(row.price) < 0) {
 				errors.push({
 					row: index + 1,
@@ -375,7 +387,7 @@ export default function BulkUploadRevenueAnalysis({
 		const template = [
 			{
 				ticker: 'AAPL',
-				period: 2024,
+				period: 1,
 				price: 150.25,
 				ps: 5.2,
 				operatingMargin: 0.25,
@@ -383,7 +395,7 @@ export default function BulkUploadRevenueAnalysis({
 			},
 			{
 				ticker: 'GOOGL',
-				period: 2024,
+				period: 2,
 				price: 2800.5,
 				ps: 4.8,
 				operatingMargin: 0.22,

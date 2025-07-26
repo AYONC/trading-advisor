@@ -17,7 +17,7 @@ import {
 	Typography,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import BulkUploadRevenueAnalysis from '@/components/BulkUploadRevenueAnalysis';
+import BulkUploadEpsGrowth from '@/components/BulkUploadEpsGrowth';
 
 interface Stock {
 	id: number;
@@ -32,20 +32,16 @@ interface Stock {
 interface FormData {
 	stockId: number | '';
 	period: number | '';
-	price: number | '';
-	ps: number | '';
-	operatingMargin: number | '';
-	salesGrowthAdjustedRate: number | '';
+	year: number | '';
+	value: number | '';
 }
 
-export default function AddRevenueAnalysisPage() {
+export default function AddEpsGrowthPage() {
 	const [formData, setFormData] = useState<FormData>({
 		stockId: '',
 		period: '',
-		price: '',
-		ps: '',
-		operatingMargin: '',
-		salesGrowthAdjustedRate: '',
+		year: '',
+		value: '',
 	});
 	const [stocks, setStocks] = useState<Stock[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -103,11 +99,10 @@ export default function AddRevenueAnalysisPage() {
 		if (
 			!formData.stockId ||
 			formData.period === '' ||
-			formData.price === '' ||
-			formData.ps === '' ||
-			formData.operatingMargin === ''
+			formData.year === '' ||
+			formData.value === ''
 		) {
-			setMessage({ type: 'error', text: 'All required fields must be filled' });
+			setMessage({ type: 'error', text: 'All fields are required' });
 			setLoading(false);
 			return;
 		}
@@ -122,35 +117,16 @@ export default function AddRevenueAnalysisPage() {
 			return;
 		}
 
-		if (formData.price < 0) {
-			setMessage({ type: 'error', text: 'Price must be positive' });
+		if (formData.year < 1900 || formData.year > 2100) {
+			setMessage({ type: 'error', text: 'Year must be between 1900 and 2100' });
 			setLoading(false);
 			return;
 		}
 
-		if (formData.ps < 0) {
-			setMessage({ type: 'error', text: 'P/S ratio must be positive' });
-			setLoading(false);
-			return;
-		}
-
-		if (formData.operatingMargin < -1 || formData.operatingMargin > 1) {
+		if (formData.value < -10 || formData.value > 10) {
 			setMessage({
 				type: 'error',
-				text: 'Operating Margin must be between -1 and 1 (-100% to 100%)',
-			});
-			setLoading(false);
-			return;
-		}
-
-		if (
-			formData.salesGrowthAdjustedRate !== '' &&
-			(formData.salesGrowthAdjustedRate < -1 ||
-				formData.salesGrowthAdjustedRate > 10)
-		) {
-			setMessage({
-				type: 'error',
-				text: 'Sales Growth Adjusted Rate must be between -1 and 10',
+				text: 'Value must be between -10 and 10',
 			});
 			setLoading(false);
 			return;
@@ -161,15 +137,11 @@ export default function AddRevenueAnalysisPage() {
 			const submitData = {
 				stockId: Number(formData.stockId),
 				period: Number(formData.period),
-				price: Number(formData.price),
-				ps: Number(formData.ps),
-				operatingMargin: Number(formData.operatingMargin),
-				salesGrowthAdjustedRate: formData.salesGrowthAdjustedRate
-					? Number(formData.salesGrowthAdjustedRate)
-					: null,
+				year: Number(formData.year),
+				value: Number(formData.value),
 			};
 
-			const response = await fetch('/api/revenue-analysis', {
+			const response = await fetch('/api/eps-growth', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -183,21 +155,19 @@ export default function AddRevenueAnalysisPage() {
 				const selectedStock = stocks.find((s) => s.id === formData.stockId);
 				setMessage({
 					type: 'success',
-					text: `Revenue analysis for ${selectedStock?.ticker} (${selectedStock?.companyName}) added successfully!`,
+					text: `EPS Growth for ${selectedStock?.ticker} (${selectedStock?.companyName}) added successfully!`,
 				});
 				// Reset form
 				setFormData({
 					stockId: '',
 					period: '',
-					price: '',
-					ps: '',
-					operatingMargin: '',
-					salesGrowthAdjustedRate: '',
+					year: '',
+					value: '',
 				});
 			} else {
 				setMessage({
 					type: 'error',
-					text: data.error || 'Failed to add revenue analysis',
+					text: data.error || 'Failed to add EPS Growth',
 				});
 			}
 		} catch (error) {
@@ -212,7 +182,7 @@ export default function AddRevenueAnalysisPage() {
 	const handleBulkUploadSuccess = (result: any) => {
 		setMessage({
 			type: 'success',
-			text: `Bulk upload completed: ${result.successCount} analyses added successfully!`,
+			text: `Bulk upload completed: ${result.successCount} records added successfully!`,
 		});
 		// Optional: Refresh or update any data if needed
 	};
@@ -221,15 +191,15 @@ export default function AddRevenueAnalysisPage() {
 		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
 				<Typography variant="h4" component="h1" gutterBottom>
-					Add Revenue Stock Analysis
+					Add EPS Growth
 				</Typography>
 				<Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
-					Add financial analysis data for stock revenue performance
+					Add EPS growth data for stock analysis
 				</Typography>
 
 				{/* Bulk Upload Section */}
 				<Box sx={{ mb: 4 }}>
-					<BulkUploadRevenueAnalysis onSuccess={handleBulkUploadSuccess} />
+					<BulkUploadEpsGrowth onSuccess={handleBulkUploadSuccess} />
 				</Box>
 
 				{/* Divider */}
@@ -243,7 +213,7 @@ export default function AddRevenueAnalysisPage() {
 							backgroundColor: 'background.paper',
 						}}
 					>
-						OR ADD SINGLE ANALYSIS
+						OR ADD SINGLE RECORD
 					</Typography>
 					<Box sx={{ flexGrow: 1, height: '1px', bgcolor: 'divider' }} />
 				</Box>
@@ -296,7 +266,7 @@ export default function AddRevenueAnalysisPage() {
 										)}
 									</FormControl>
 
-									{/* Period and Price */}
+									{/* Period and Year */}
 									<Box
 										sx={{
 											display: 'flex',
@@ -320,67 +290,31 @@ export default function AddRevenueAnalysisPage() {
 
 										<TextField
 											fullWidth
-											label="Stock Price"
+											label="Year"
 											type="number"
-											inputProps={{ step: '0.01', min: '0' }}
-											value={formData.price}
-											onChange={handleInputChange('price')}
-											placeholder="0.00"
+											inputProps={{ min: '1900', max: '2100' }}
+											value={formData.year}
+											onChange={handleInputChange('year')}
+											placeholder="e.g., 2024"
 											required
 											disabled={loading}
-											helperText="Current stock price"
+											helperText="Target year (1900-2100)"
 											sx={{ flex: 1 }}
 										/>
 									</Box>
 
-									{/* P/S and Operating Margin */}
-									<Box
-										sx={{
-											display: 'flex',
-											gap: 2,
-											flexDirection: { xs: 'column', sm: 'row' },
-										}}
-									>
-										<TextField
-											fullWidth
-											label="P/S Ratio"
-											type="number"
-											inputProps={{ step: '0.0001', min: '0' }}
-											value={formData.ps}
-											onChange={handleInputChange('ps')}
-											placeholder="0.0000"
-											required
-											disabled={loading}
-											helperText="Price-to-Sales ratio (forward)"
-											sx={{ flex: 1 }}
-										/>
-
-										<TextField
-											fullWidth
-											label="Operating Margin"
-											type="number"
-											inputProps={{ step: '0.0001', min: '-1', max: '1' }}
-											value={formData.operatingMargin}
-											onChange={handleInputChange('operatingMargin')}
-											placeholder="0.0000"
-											required
-											disabled={loading}
-											helperText="Operating margin (-1 to 1, e.g., 0.25 for 25%)"
-											sx={{ flex: 1 }}
-										/>
-									</Box>
-
-									{/* Sales Growth Adjusted Rate (Optional) */}
+									{/* Value */}
 									<TextField
 										fullWidth
-										label="Sales Growth Adjusted Rate (Optional)"
+										label="Value"
 										type="number"
-										inputProps={{ step: '0.0001', min: '-1', max: '10' }}
-										value={formData.salesGrowthAdjustedRate}
-										onChange={handleInputChange('salesGrowthAdjustedRate')}
+										inputProps={{ step: '0.0001', min: '-10', max: '10' }}
+										value={formData.value}
+										onChange={handleInputChange('value')}
 										placeholder="0.0000"
+										required
 										disabled={loading}
-										helperText="Sales growth adjustment rate (optional, e.g., 0.15 for 15%)"
+										helperText="EPS growth value (-10 to 10, e.g., 0.15 for 15%)"
 									/>
 
 									{/* Action Buttons */}
@@ -395,10 +329,8 @@ export default function AddRevenueAnalysisPage() {
 												setFormData({
 													stockId: '',
 													period: '',
-													price: '',
-													ps: '',
-													operatingMargin: '',
-													salesGrowthAdjustedRate: '',
+													year: '',
+													value: '',
 												});
 												setMessage(null);
 											}}
@@ -413,7 +345,7 @@ export default function AddRevenueAnalysisPage() {
 												loading ? <CircularProgress size={20} /> : <AddIcon />
 											}
 										>
-											{loading ? 'Adding...' : 'Add Analysis'}
+											{loading ? 'Adding...' : 'Add Record'}
 										</Button>
 									</Box>
 								</Box>
@@ -480,15 +412,11 @@ export default function AddRevenueAnalysisPage() {
 										<strong>Period:</strong> Analysis period (integer ≥ 0)
 									</Typography>
 									<Typography variant="body2">
-										<strong>P/S Ratio:</strong> Price-to-Sales ratio (forward)
+										<strong>Year:</strong> Target year for growth calculation
 									</Typography>
 									<Typography variant="body2">
-										<strong>Operating Margin:</strong> Operating profit margin
-										(as decimal, -1 to 1)
-									</Typography>
-									<Typography variant="body2">
-										<strong>Sales Growth Rate:</strong> Optional sales growth
-										adjustment
+										<strong>Value:</strong> EPS growth rate (as decimal, -10 to
+										10)
 									</Typography>
 								</Box>
 							</CardContent>

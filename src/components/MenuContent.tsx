@@ -47,6 +47,16 @@ const analysisItems = [
 		icon: <TrendingUpIcon />,
 		href: '/analysis/revenue/add',
 	},
+	{
+		text: 'Add EPS Growth',
+		icon: <TrendingUpIcon />,
+		href: '/analysis/eps-growth/add',
+	},
+	{
+		text: 'Add Sales Growth',
+		icon: <TrendingUpIcon />,
+		href: '/analysis/sales-growth/add',
+	},
 ];
 
 const secondaryListItems = [
@@ -110,7 +120,12 @@ export default function MenuContent() {
 						{basicDataOpen ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 				</ListItem>
-				<Collapse in={basicDataOpen} timeout="auto" unmountOnExit>
+				<Collapse
+					in={basicDataOpen}
+					timeout="auto"
+					unmountOnExit
+					sx={{ mt: -1 }}
+				>
 					<List component="div">
 						{basicDataItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
@@ -145,7 +160,12 @@ export default function MenuContent() {
 						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 				</ListItem>
-				<Collapse in={analysisOpen} timeout="auto" unmountOnExit>
+				<Collapse
+					in={analysisOpen}
+					timeout="auto"
+					unmountOnExit
+					sx={{ mt: -1 }}
+				>
 					<List component="div" disablePadding>
 						{analysisItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
