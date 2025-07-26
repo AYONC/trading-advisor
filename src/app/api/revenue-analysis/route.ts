@@ -142,10 +142,16 @@ export async function GET(request: NextRequest) {
 		const revenueAnalysisRepository =
 			dataSource.getRepository(RevenueStockAnalysis);
 
-		// Get URL search parameters for filtering
+		// Get URL search parameters for filtering and pagination
 		const { searchParams } = new URL(request.url);
 		const stockId = searchParams.get('stockId');
 		const period = searchParams.get('period');
+		const page = searchParams.get('page') || '1';
+		const limit = searchParams.get('limit') || '50';
+
+		const pageNumber = Math.max(1, parseInt(page, 10));
+		const limitNumber = Math.min(100, Math.max(1, parseInt(limit, 10))); // Max 100 items per page
+		const skip = (pageNumber - 1) * limitNumber;
 
 		let whereCondition = {};
 
@@ -157,7 +163,7 @@ export async function GET(request: NextRequest) {
 			whereCondition = { ...whereCondition, period: Number(period) };
 		}
 
-		const analyses = await revenueAnalysisRepository.find({
+		const [analyses, total] = await revenueAnalysisRepository.findAndCount({
 			where:
 				Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
 			relations: ['stock', 'stock.sector'],
@@ -165,9 +171,23 @@ export async function GET(request: NextRequest) {
 				period: 'DESC',
 				createdAt: 'DESC',
 			},
+			skip,
+			take: limitNumber,
 		});
 
-		return NextResponse.json(analyses);
+		const totalPages = Math.ceil(total / limitNumber);
+
+		return NextResponse.json({
+			data: analyses,
+			pagination: {
+				current: pageNumber,
+				total: totalPages,
+				limit: limitNumber,
+				totalItems: total,
+				hasNext: pageNumber < totalPages,
+				hasPrev: pageNumber > 1,
+			},
+		});
 	} catch (error) {
 		console.error('Error fetching revenue analyses:', error);
 		return NextResponse.json(

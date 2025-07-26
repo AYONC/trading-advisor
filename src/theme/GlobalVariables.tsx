@@ -9,10 +9,12 @@ export default function GlobalVariables() {
 	const styles = useMemo(
 		() => ({
 			'* > .MuiDataGrid-main': {},
+			'* > .MuiDataGrid-cell': {
+				display: 'flex',
+				alignItems: 'center',
+			},
 			'* > .MuiDataGrid-row, * > .MuiDataGrid-columnHeaders, * > .MuiDataGrid-cell':
 				{
-					display: 'flex',
-					alignItems: 'center',
 					'--DataGrid-rowBorderColor': mode === 'light' ? gray[200] : gray[700],
 				},
 		}),
