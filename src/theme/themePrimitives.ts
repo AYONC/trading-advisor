@@ -385,14 +385,14 @@ export const typography = {
 		fontSize: defaultTheme.typography.pxToRem(18),
 	},
 	subtitle2: {
-		fontSize: defaultTheme.typography.pxToRem(14),
+		fontSize: defaultTheme.typography.pxToRem(16),
 		fontWeight: 500,
 	},
 	body1: {
-		fontSize: defaultTheme.typography.pxToRem(14),
+		fontSize: defaultTheme.typography.pxToRem(16),
 	},
 	body2: {
-		fontSize: defaultTheme.typography.pxToRem(14),
+		fontSize: defaultTheme.typography.pxToRem(16),
 		fontWeight: 400,
 	},
 	caption: {

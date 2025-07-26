@@ -1,6 +1,10 @@
 'use client';
 
-import { ShowChart as ChartIcon } from '@mui/icons-material';
+import {
+	ShowChart as ChartIcon,
+	TrendingDown as TrendingDownIcon,
+	TrendingUp as TrendingUpIcon,
+} from '@mui/icons-material';
 import { Box, Card, CardContent, Chip, Paper, Typography } from '@mui/material';
 import {
 	Line,
@@ -10,7 +14,6 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
-import { formatChange, formatPrice, getChangeColor, getChangeIcon } from './common';
 
 interface Stock {
 	id: number;
@@ -54,6 +57,30 @@ export default function MarketChartView({
 	marketDataLoading,
 	onStockClick,
 }: MarketChartViewProps) {
+	const formatPrice = (price?: number) => {
+		if (price === undefined) return 'N/A';
+		return `$${price.toFixed(2)}`;
+	};
+
+	const formatChange = (change?: number, changePercent?: number) => {
+		if (change === undefined || changePercent === undefined) return 'N/A';
+		const sign = change >= 0 ? '+' : '';
+		return `${sign}${change.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)`;
+	};
+
+	const getChangeColor = (change?: number) => {
+		if (change === undefined) return 'text.secondary';
+		return change >= 0 ? 'success.main' : 'error.main';
+	};
+
+	const getChangeIcon = (change?: number) => {
+		if (change === undefined) return null;
+		return change >= 0 ? (
+			<TrendingUpIcon fontSize="small" />
+		) : (
+			<TrendingDownIcon fontSize="small" />
+		);
+	};
 	return (
 		<Box
 			sx={{
@@ -111,6 +138,9 @@ export default function MarketChartView({
 										size="small"
 										color="secondary"
 										variant="outlined"
+										sx={{
+											pt: 0.5,
+										}}
 									/>
 								</Box>
 								<ChartIcon color="action" />
@@ -143,7 +173,24 @@ export default function MarketChartView({
 									<ResponsiveContainer width="100%" height="100%">
 										<LineChart data={stock.marketData.historical}>
 											<XAxis dataKey="date" hide />
-											<YAxis hide />
+											<YAxis
+												hide
+												domain={(() => {
+													// 데이터의 최저가와 최고가 계산
+													const prices = stock.marketData!.historical!.map(
+														(h) => h.close,
+													);
+													const minPrice = Math.min(...prices);
+													const maxPrice = Math.max(...prices);
+
+													// 5% 패딩을 추가하여 더 타이트한 범위 설정
+													const padding = (maxPrice - minPrice) * 0.05;
+													return [
+														Math.max(0, minPrice - padding), // 0보다 작아지지 않도록
+														maxPrice + padding,
+													];
+												})()}
+											/>
 											<Tooltip
 												labelFormatter={(value) => `Date: ${value}`}
 												formatter={(value: number) => [

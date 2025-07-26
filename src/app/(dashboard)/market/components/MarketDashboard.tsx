@@ -13,6 +13,7 @@ import {
 	Container,
 	Typography,
 } from '@mui/material';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import MarketChartView from './MarketChartView';
 import MarketTableView from './MarketTableView';
@@ -57,11 +58,22 @@ interface MarketDashboardProps {
 export default function MarketDashboard({
 	initialStocks,
 }: MarketDashboardProps) {
+	const searchParams = useSearchParams();
+
+	// Query parameter에서 view type 읽기
+	const getInitialViewType = (): ViewType => {
+		const viewParam = searchParams.get('view');
+		if (viewParam === 'table' || viewParam === 'chart') {
+			return viewParam;
+		}
+		return 'table'; // 기본값
+	};
+
 	const [stocksWithMarketData, setStocksWithMarketData] = useState<
 		StockWithMarketData[]
 	>(initialStocks.map((stock) => ({ ...stock, marketData: undefined })));
 	const [marketDataLoading, setMarketDataLoading] = useState(false);
-	const [viewType, setViewType] = useState<ViewType>('table');
+	const [viewType, setViewType] = useState<ViewType>(getInitialViewType());
 	const [message, setMessage] = useState<{
 		type: 'success' | 'error';
 		text: string;
@@ -129,8 +141,17 @@ export default function MarketDashboard({
 		window.open(`https://finance.yahoo.com/quote/${ticker}`, '_blank');
 	};
 
+	const handleViewTypeChange = (newViewType: ViewType) => {
+		setViewType(newViewType);
+
+		// URL query parameter 업데이트
+		const url = new URL(window.location.href);
+		url.searchParams.set('view', newViewType);
+		window.history.pushState({}, '', url.toString());
+	};
+
 	return (
-		<Container maxWidth="lg">
+		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
 				<Box sx={{ mb: 4 }}>
 					<Box
@@ -157,14 +178,14 @@ export default function MarketDashboard({
 							<Button
 								variant={viewType === 'table' ? 'contained' : 'outlined'}
 								startIcon={<TableChartIcon />}
-								onClick={() => setViewType('table')}
+								onClick={() => handleViewTypeChange('table')}
 							>
 								Table
 							</Button>
 							<Button
 								variant={viewType === 'chart' ? 'contained' : 'outlined'}
 								startIcon={<ViewModuleIcon />}
-								onClick={() => setViewType('chart')}
+								onClick={() => handleViewTypeChange('chart')}
 							>
 								Chart
 							</Button>

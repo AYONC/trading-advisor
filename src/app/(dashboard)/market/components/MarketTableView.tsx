@@ -75,7 +75,7 @@ const columns: GridColDef[] = [
 		headerName: 'Company Name',
 		flex: 1,
 		minWidth: 200,
-		align: 'center',
+		align: 'left',
 		headerAlign: 'center',
 		renderCell: (params: GridCellParams) => params.value as string,
 	},
@@ -205,7 +205,24 @@ function Chart7Day({ params }: { params: GridCellParams }) {
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart data={stock.marketData.historical}>
 						<XAxis dataKey="date" hide />
-						<YAxis hide />
+						<YAxis
+							hide
+							domain={(() => {
+								// 데이터의 최저가와 최고가 계산
+								const prices = stock.marketData!.historical!.map(
+									(h) => h.close,
+								);
+								const minPrice = Math.min(...prices);
+								const maxPrice = Math.max(...prices);
+
+								// 5% 패딩을 추가하여 더 타이트한 범위 설정
+								const padding = (maxPrice - minPrice) * 0.05;
+								return [
+									Math.max(0, minPrice - padding), // 0보다 작아지지 않도록
+									maxPrice + padding,
+								];
+							})()}
+						/>
 						<Tooltip
 							content={({ label, payload }) => {
 								return (
@@ -241,10 +258,10 @@ function Chart7Day({ params }: { params: GridCellParams }) {
 			</div>
 			<div className="flex flex-col items-center justify-center gap-0 w-full h-10">
 				<p className="text-xs">
-					first: {firstPrice?.toFixed(2)} / last: {lastPrice?.toFixed(2)}
+					first: ${firstPrice?.toFixed(2)} / last: ${lastPrice?.toFixed(2)}
 				</p>
 				<p className="text-xs">
-					min: {lowPrice.toFixed(2)} / max: {highPrice.toFixed(2)}
+					min: ${lowPrice.toFixed(2)} / max: ${highPrice.toFixed(2)}
 				</p>
 			</div>
 		</div>
@@ -298,7 +315,6 @@ export default function MarketTableView({
 					'& .MuiDataGrid-cell': {
 						display: 'flex',
 						alignItems: 'center',
-						justifyContent: 'center',
 					},
 				}}
 			/>
