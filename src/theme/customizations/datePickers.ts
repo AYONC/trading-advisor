@@ -2,12 +2,10 @@ import { menuItemClasses } from '@mui/material/MenuItem';
 import { alpha, type Theme } from '@mui/material/styles';
 import { pickersDayClasses, yearCalendarClasses } from '@mui/x-date-pickers';
 import type { PickerComponents } from '@mui/x-date-pickers/themeAugmentation';
-import type { PickersProComponents } from '@mui/x-date-pickers-pro/themeAugmentation';
 import { brand, gray } from '../themePrimitives';
 
 /* eslint-disable import/prefer-default-export */
-export const datePickersCustomizations: PickersProComponents<Theme> &
-	PickerComponents<Theme> = {
+export const datePickersCustomizations: PickerComponents<Theme> = {
 	MuiPickerPopper: {
 		styleOverrides: {
 			paper: ({ theme }) => ({

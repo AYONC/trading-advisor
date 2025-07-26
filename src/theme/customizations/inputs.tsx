@@ -8,7 +8,6 @@ import { toggleButtonGroupClasses } from '@mui/material/ToggleButtonGroup';
 import * as React from 'react';
 import { brand, gray } from '../themePrimitives';
 
-/* eslint-disable import/prefer-default-export */
 export const inputsCustomizations: Components<Theme> = {
 	MuiButtonBase: {
 		defaultProps: {

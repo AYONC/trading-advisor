@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Chip, Paper, Typography, useTheme } from '@mui/material';
+import { Box, Chip, Paper, Typography } from '@mui/material';
 import {
 	DataGrid,
 	type GridCellParams,
@@ -199,7 +199,7 @@ function Chart7Day({ params }: { params: GridCellParams }) {
 	const lowPrice = Math.min(...historicalData.map((h) => h.close));
 
 	return (
-		<div className="flex flex-col items-center justify-center gap-2">
+		<div className="flex flex-col items-center justify-center">
 			<div className="flex flex-col items-center justify-center gap-0 w-full h-5">
 				<ResponsiveContainer width="100%" height="100%">
 					<LineChart data={stock.marketData.historical}>
@@ -275,8 +275,6 @@ export default function MarketTableView({
 	marketDataLoading,
 	onStockClick,
 }: MarketTableViewProps) {
-	const theme = useTheme();
-
 	// Convert stock data to DataGrid rows format
 	const rows: GridRowsProp = stocksWithMarketData.map((stock) => ({
 		...stock,
@@ -310,13 +308,6 @@ export default function MarketTableView({
 				loading={loading || marketDataLoading}
 				localeText={{
 					noRowsLabel: 'No stocks found. Add stocks to see market data!',
-				}}
-				sx={{
-					'--DataGrid-rowBorderColor': theme.palette.grey[200],
-					'& .MuiDataGrid-cell': {
-						display: 'flex',
-						alignItems: 'center',
-					},
 				}}
 			/>
 		</Paper>

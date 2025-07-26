@@ -20,17 +20,15 @@ import {
 	DialogContentText,
 	DialogTitle,
 	Fab,
-	IconButton,
 	Paper,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
 	TextField,
 	Typography,
 } from '@mui/material';
+import {
+	DataGrid,
+	GridActionsCellItem,
+	type GridColDef,
+} from '@mui/x-data-grid';
 import { useCallback, useEffect, useState } from 'react';
 import { formatDateTime } from '@/utils/date';
 
@@ -209,6 +207,92 @@ export default function SectorsPage() {
 		setSectorToDelete(null);
 	};
 
+	// DataGrid 컬럼 정의
+	const columns: GridColDef[] = [
+		{
+			field: 'id',
+			headerName: 'ID',
+			width: 100,
+			renderHeader: () => (
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+					<TagIcon fontSize="small" />
+					ID
+				</Box>
+			),
+			renderCell: (params) => (
+				<Typography
+					variant="body2"
+					sx={{
+						fontFamily: 'monospace',
+						color: 'text.secondary',
+						fontWeight: 'medium',
+					}}
+				>
+					#{params.value}
+				</Typography>
+			),
+		},
+		{
+			field: 'name',
+			headerName: 'Name',
+			width: 200,
+			renderHeader: () => (
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+					<BusinessIcon fontSize="small" />
+					Name
+				</Box>
+			),
+			renderCell: (params) => (
+				<Chip
+					label={params.value}
+					variant="outlined"
+					color="primary"
+					size="small"
+				/>
+			),
+		},
+		{
+			field: 'description',
+			headerName: 'Description',
+			flex: 1,
+			minWidth: 300,
+		},
+		{
+			field: 'createdAt',
+			headerName: 'Created',
+			width: 180,
+			renderCell: (params) => formatDateTime(params.value),
+		},
+		{
+			field: 'updatedAt',
+			headerName: 'Updated',
+			width: 180,
+			renderCell: (params) => formatDateTime(params.value),
+		},
+		{
+			field: 'actions',
+			type: 'actions',
+			headerName: 'Actions',
+			width: 120,
+			getActions: (params) => [
+				<GridActionsCellItem
+					icon={<EditIcon />}
+					label="Edit"
+					onClick={() => handleOpenDialog(params.row)}
+					disabled={submitting}
+					key="edit"
+				/>,
+				<GridActionsCellItem
+					icon={<DeleteIcon sx={{ color: 'error.main' }} />}
+					label="Delete"
+					onClick={() => handleDeleteRequest(params.row)}
+					disabled={submitting}
+					key="delete"
+				/>,
+			],
+		},
+	];
+
 	return (
 		<Container maxWidth="lg">
 			<Box sx={{ py: 4 }}>
@@ -244,108 +328,48 @@ export default function SectorsPage() {
 					</Alert>
 				)}
 
-				<Paper elevation={2}>
-					{loading ? (
-						<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-							<CircularProgress />
-						</Box>
-					) : (
-						<TableContainer>
-							<Table>
-								<TableHead>
-									<TableRow>
-										<TableCell>
-											<Box
-												sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-											>
-												<TagIcon fontSize="small" />
-												ID
-											</Box>
-										</TableCell>
-										<TableCell>
-											<Box
-												sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-											>
-												<BusinessIcon fontSize="small" />
-												Name
-											</Box>
-										</TableCell>
-										<TableCell>Description</TableCell>
-										<TableCell>Created</TableCell>
-										<TableCell>Updated</TableCell>
-										<TableCell align="center">Actions</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{sectors.length === 0 ? (
-										<TableRow>
-											<TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-												<Typography color="text.secondary">
-													No sectors found. Create your first sector!
-												</Typography>
-											</TableCell>
-										</TableRow>
-									) : (
-										sectors.map((sector) => (
-											<TableRow key={sector.id} hover>
-												<TableCell>
-													<Typography
-														variant="body2"
-														sx={{
-															fontFamily: 'monospace',
-															color: 'text.secondary',
-															fontWeight: 'medium',
-														}}
-													>
-														#{sector.id}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													<Chip
-														label={sector.name}
-														variant="outlined"
-														color="primary"
-													/>
-												</TableCell>
-												<TableCell>{sector.description}</TableCell>
-												<TableCell>
-													{formatDateTime(sector.createdAt)}
-												</TableCell>
-												<TableCell>
-													{formatDateTime(sector.updatedAt)}
-												</TableCell>
-												<TableCell align="center">
-													<Box
-														sx={{
-															display: 'flex',
-															gap: 1,
-															justifyContent: 'center',
-														}}
-													>
-														<IconButton
-															size="small"
-															onClick={() => handleOpenDialog(sector)}
-															disabled={submitting}
-														>
-															<EditIcon fontSize="small" />
-														</IconButton>
-														<IconButton
-															size="small"
-															color="error"
-															onClick={() => handleDeleteRequest(sector)}
-															disabled={submitting}
-														>
-															<DeleteIcon fontSize="small" />
-														</IconButton>
-													</Box>
-												</TableCell>
-											</TableRow>
-										))
-									)}
-								</TableBody>
-							</Table>
-						</TableContainer>
-					)}
+				<Paper elevation={2} sx={{ height: 600, width: '100%' }}>
+					<DataGrid
+						rows={sectors}
+						columns={columns}
+						loading={loading}
+						initialState={{
+							pagination: { paginationModel: { pageSize: 25 } },
+						}}
+						pageSizeOptions={[10, 25, 50, 100]}
+						disableRowSelectionOnClick
+						density="comfortable"
+						sx={{
+							border: 0,
+							'& .MuiDataGrid-cell:focus': {
+								outline: 'none',
+							},
+							'& .MuiDataGrid-row:hover': {
+								backgroundColor: 'action.hover',
+							},
+						}}
+						slots={{
+							noRowsOverlay: () => (
+								<Box
+									sx={{
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+										justifyContent: 'center',
+										height: '100%',
+										gap: 2,
+									}}
+								>
+									<BusinessIcon
+										sx={{ fontSize: 48, color: 'text.secondary' }}
+									/>
+									<Typography color="text.secondary">
+										No sectors found. Create your first sector!
+									</Typography>
+								</Box>
+							),
+						}}
+					/>
 				</Paper>
 
 				{/* Add/Edit Dialog */}

@@ -11,17 +11,6 @@ import type * as React from 'react';
 import Header from '@/components/Header';
 import SideMenu from '@/components/SideMenu';
 import AppTheme from '@/theme/AppTheme';
-import {
-	chartsCustomizations,
-	datePickersCustomizations,
-	treeViewCustomizations,
-} from '@/theme/customizations';
-
-const xThemeComponents = {
-	...chartsCustomizations,
-	...datePickersCustomizations,
-	...treeViewCustomizations,
-};
 
 export default function DashboardLayout({
 	children,
@@ -29,7 +18,7 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<AppTheme themeComponents={xThemeComponents}>
+		<AppTheme>
 			<CssBaseline enableColorScheme />
 			<Box sx={{ display: 'flex' }}>
 				<SideMenu />

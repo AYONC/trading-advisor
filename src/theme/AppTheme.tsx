@@ -1,17 +1,21 @@
 import type { ThemeOptions } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import * as React from 'react';
+import { chartsCustomizations } from '@/theme/customizations/charts';
 import { dataDisplayCustomizations } from '@/theme/customizations/dataDisplay';
+import { datePickersCustomizations } from '@/theme/customizations/datePickers';
 import { feedbackCustomizations } from '@/theme/customizations/feedback';
 import { inputsCustomizations } from '@/theme/customizations/inputs';
 import { navigationCustomizations } from '@/theme/customizations/navigation';
 import { surfacesCustomizations } from '@/theme/customizations/surfaces';
+import { treeViewCustomizations } from '@/theme/customizations/treeView';
 import {
 	colorSchemes,
 	shadows,
 	shape,
 	typography,
 } from '@/theme/themePrimitives';
+import GlobalVariables from './GlobalVariables';
 
 interface AppThemeProps {
 	children: React.ReactNode;
@@ -43,15 +47,20 @@ export default function AppTheme(props: AppThemeProps) {
 						...feedbackCustomizations,
 						...navigationCustomizations,
 						...surfacesCustomizations,
+						...chartsCustomizations,
+						...datePickersCustomizations,
+						...treeViewCustomizations,
 						...themeComponents,
 					},
 				});
 	}, [disableCustomTheme, themeComponents]);
+
 	if (disableCustomTheme) {
 		return <React.Fragment>{children}</React.Fragment>;
 	}
 	return (
 		<ThemeProvider theme={theme} disableTransitionOnChange>
+			<GlobalVariables />
 			{children}
 		</ThemeProvider>
 	);
