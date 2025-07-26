@@ -79,7 +79,7 @@ export default function MenuContent() {
 
 	return (
 		<Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
-			<List dense>
+			<List dense sx={{ gap: 1 }}>
 				{mainListItems.map((item) => (
 					<ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
 						<ListItemButton
@@ -111,7 +111,7 @@ export default function MenuContent() {
 					</ListItemButton>
 				</ListItem>
 				<Collapse in={basicDataOpen} timeout="auto" unmountOnExit>
-					<List component="div" disablePadding>
+					<List component="div">
 						{basicDataItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
 								<ListItemButton
