@@ -1,12 +1,15 @@
 'use client';
 
-import { Search as SearchIcon } from '@mui/icons-material';
+import {
+	Download as DownloadIcon,
+	Search as SearchIcon,
+} from '@mui/icons-material';
 import {
 	Alert,
 	Box,
+	Button,
 	Card,
 	CardContent,
-	Chip,
 	Container,
 	InputAdornment,
 	Paper,
@@ -15,13 +18,16 @@ import {
 } from '@mui/material';
 import {
 	DataGrid,
-	type GridColDef,
 	type GridRowParams,
+	type GridRowSelectionModel,
 } from '@mui/x-data-grid';
-import { useCallback, useEffect, useState } from 'react';
-import { formatDateTime } from '@/utils/date';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { exportEarningAnalysis } from '@/utils/excel-export';
+import { useGridSelection } from '@/utils/grid-selection';
+import { generateColumns } from './column';
+import { processAnalysesData } from './earning-analysis-calculation';
 
-interface Stock {
+export interface Stock {
 	id: number;
 	ticker: string;
 	companyName: string;
@@ -31,7 +37,28 @@ interface Stock {
 	};
 }
 
-interface EarningAnalysis {
+export interface EpsGrowthData {
+	id: number;
+	period: number;
+	year: number;
+	value: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface SectorRatio {
+	id: number;
+	sectorId: number;
+	period: number;
+	roa: number;
+	pegRatio: number;
+	psgRatio: number;
+	operatingMargin: number;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface EarningAnalysis {
 	id: number;
 	period: number;
 	price: number;
@@ -42,6 +69,8 @@ interface EarningAnalysis {
 	createdAt: string;
 	updatedAt: string;
 	stock: Stock;
+	epsGrowthData: EpsGrowthData[];
+	sectorRatio?: SectorRatio;
 }
 
 interface PaginationInfo {
@@ -58,160 +87,15 @@ interface ApiResponse {
 	pagination: PaginationInfo;
 }
 
-const getGradeColor = (grade: string): string => {
-	if (grade.startsWith('A')) return '#4caf50'; // Green
-	if (grade.startsWith('B')) return '#ff9800'; // Orange
-	if (grade.startsWith('C')) return '#2196f3'; // Blue
-	if (grade.startsWith('D')) return '#ff5722'; // Deep Orange
-	return '#9e9e9e'; // Grey for E
-};
-
-const columns: GridColDef[] = [
-	{
-		field: 'period',
-		headerName: 'Period',
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-	},
-	{
-		field: 'stock.id',
-		headerName: 'Stock ID',
-		align: 'center',
-		headerAlign: 'center',
-		valueGetter: (_, row) => row.stock.id,
-		renderCell: (params) => params.row.stock.id,
-	},
-	{
-		field: 'stock.ticker',
-		headerName: 'Ticker',
-		valueGetter: (_, row) => row.stock.ticker,
-		renderCell: (params) => {
-			return (
-				<Typography variant="body2" fontWeight="bold">
-					{params.row.stock.ticker}
-				</Typography>
-			);
-		},
-	},
-	{
-		field: 'stock.companyName',
-		headerName: 'Company Name',
-		flex: 1,
-		minWidth: 400,
-		align: 'left',
-		headerAlign: 'left',
-		valueGetter: (_, row) => row.stock.companyName,
-		renderCell: (params) => (
-			<p className={'text-sm font-medium'}>{params.row.stock.companyName}</p>
-		),
-	},
-	{
-		field: 'epsRevisionGrade',
-		headerName: 'EPS Revision Grade',
-		width: 140,
-		align: 'center',
-		headerAlign: 'center',
-		renderCell: (params) => (
-			<Chip
-				label={params.value}
-				size="medium"
-				sx={{
-					backgroundColor: getGradeColor(params.value),
-					border: 'none',
-					color: 'white',
-					fontWeight: 'bold',
-					minWidth: 40,
-					'& .MuiChip-label': {
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						color: 'white',
-						fontWeight: 'bold',
-						lineHeight: '1',
-						fontSize: '14px',
-					},
-				}}
-			/>
-		),
-	},
-	{
-		field: 'price',
-		headerName: 'Price',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => (
-			<Typography variant="body2" fontWeight="medium">
-				${Number(params.value).toFixed(2)}
-			</Typography>
-		),
-	},
-	{
-		field: 'pe',
-		headerName: 'P/E (FWD)',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => Number(params.value).toFixed(2),
-	},
-	{
-		field: 'roa',
-		headerName: 'ROA',
-		width: 100,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) => `${(Number(params.value) * 100).toFixed(2)}%`,
-	},
-	{
-		field: 'epsGrowthAdjustedRate',
-		headerName: 'EPS Growth Adj. Rate',
-		width: 140,
-		align: 'center',
-		headerAlign: 'center',
-		type: 'number',
-		renderCell: (params) =>
-			params.value ? `${(Number(params.value) * 100).toFixed(2)}%` : '-',
-	},
-	{
-		field: 'stock.sector.name',
-		headerName: 'Sector',
-		width: 120,
-		align: 'left',
-		headerAlign: 'left',
-		valueGetter: (_, row) => row.stock.sector.name,
-		renderCell: (params) => {
-			return (
-				<Chip
-					label={params.row.stock.sector.name}
-					variant="outlined"
-					color="primary"
-					size="small"
-					sx={{
-						fontFamily: 'monospace',
-						fontWeight: 'bold',
-					}}
-				/>
-			);
-		},
-	},
-	{
-		field: 'createdAt',
-		headerName: 'Created',
-		width: 200,
-		align: 'center',
-		headerAlign: 'center',
-		renderCell: (params) => formatDateTime(params.row.createdAt),
-	},
-];
-
 export default function EarningAnalysisPage() {
-	const [analyses, setAnalyses] = useState<EarningAnalysis[]>([]);
-	console.log(analyses);
+	const [rawAnalyses, setRawAnalyses] = useState<EarningAnalysis[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [searchPeriod, setSearchPeriod] = useState<string>('');
+	const [message, setMessage] = useState<{
+		type: 'success' | 'error';
+		text: string;
+	} | null>(null);
+
 	const [pagination, setPagination] = useState<PaginationInfo>({
 		current: 1,
 		total: 1,
@@ -224,11 +108,84 @@ export default function EarningAnalysisPage() {
 		page: 0,
 		pageSize: 50,
 	});
-	const [searchPeriod, setSearchPeriod] = useState('');
-	const [message, setMessage] = useState<{
-		type: 'success' | 'error';
-		text: string;
-	} | null>(null);
+
+	// Memoize processed analyses
+	const analyses = useMemo(() => {
+		console.log('Processing analyses data...');
+		return processAnalysesData(rawAnalyses);
+	}, [rawAnalyses]);
+
+	// Extract all row IDs for grid selection
+	const allRowIds = useMemo(() => {
+		return analyses.map((analysis) => analysis.id);
+	}, [analyses]);
+
+	// Use the custom grid selection hook
+	const {
+		rowSelectionModel,
+		selectedRowIds,
+		selectedRowCount,
+		handleSelectionChange,
+		clearSelection,
+		isEmpty: isSelectionEmpty,
+	} = useGridSelection(allRowIds);
+
+	// Memoize columns generation
+	const columns = useMemo(() => generateColumns(), []);
+
+	const handleRowClick = useCallback((params: GridRowParams) => {
+		console.log('Row clicked:', params.row);
+	}, []);
+
+	// Excel download function - now using excel-export utility
+	const downloadExcel = useCallback(() => {
+		console.log('Starting download with selected IDs:', selectedRowIds);
+
+		if (selectedRowIds.length === 0) {
+			setMessage({
+				type: 'error',
+				text: 'Please select at least one row to download',
+			});
+			return;
+		}
+
+		try {
+			// Filter selected analyses
+			const selectedAnalyses = analyses.filter((analysis) =>
+				selectedRowIds.includes(analysis.id),
+			);
+
+			if (selectedAnalyses.length === 0) {
+				setMessage({
+					type: 'error',
+					text: 'No valid data found for selected rows',
+				});
+				return;
+			}
+
+			// Use the excel export utility
+			const result = exportEarningAnalysis(selectedAnalyses);
+
+			// Handle result
+			if (result.success) {
+				setMessage({
+					type: 'success',
+					text: result.message,
+				});
+			} else {
+				setMessage({
+					type: 'error',
+					text: result.message,
+				});
+			}
+		} catch (error) {
+			console.error('Excel download error:', error);
+			setMessage({
+				type: 'error',
+				text: 'Failed to download Excel file. Please try again.',
+			});
+		}
+	}, [analyses, selectedRowIds]);
 
 	const fetchAnalyses = useCallback(async (page = 1, period?: string) => {
 		try {
@@ -248,7 +205,7 @@ export default function EarningAnalysisPage() {
 
 			if (response.ok) {
 				const data: ApiResponse = await response.json();
-				setAnalyses(data.data);
+				setRawAnalyses(data.data);
 				setPagination(data.pagination);
 				setPaginationModel({
 					page: data.pagination.current - 1, // DataGrid uses 0-based page
@@ -281,27 +238,20 @@ export default function EarningAnalysisPage() {
 		fetchAnalyses(1, searchPeriod);
 	};
 
-	const handleRowClick = (params: GridRowParams) => {
-		const ticker = params.row.stock?.ticker;
-		if (ticker) {
-			window.open(`https://finance.yahoo.com/quote/${ticker}`, '_blank');
-		}
-	};
-
 	useEffect(() => {
 		fetchAnalyses(1);
 	}, [fetchAnalyses]);
 
 	return (
-		<Container maxWidth="xl">
+		<Container maxWidth={100 as any}>
 			<Box sx={{ py: 4 }}>
 				<Box sx={{ mb: 4 }}>
 					<Typography variant="h4" component="h1" gutterBottom>
 						Earning Stock Analysis
 					</Typography>
 					<Typography variant="subtitle1" color="text.secondary">
-						View earning analysis data with financial metrics. Click on any row
-						to view stock on Yahoo Finance.
+						View earning analysis data with financial metrics and EPS growth
+						data. Click on any row to view stock on Yahoo Finance.
 					</Typography>
 				</Box>
 
@@ -314,7 +264,7 @@ export default function EarningAnalysisPage() {
 						<Box
 							component="form"
 							onSubmit={handleSearchSubmit}
-							sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+							sx={{ display: 'flex', gap: 2, alignItems: 'center', my: 2 }}
 						>
 							<TextField
 								label="Period"
@@ -332,10 +282,34 @@ export default function EarningAnalysisPage() {
 								sx={{ minWidth: 300 }}
 							/>
 							<button type="submit" style={{ display: 'none' }} />
+							<Typography variant="body2" color="text.secondary">
+								Press Enter to search or leave empty to view all records
+							</Typography>
 						</Box>
-						<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-							Press Enter to search or leave empty to view all records
-						</Typography>
+
+						{/* Download Section */}
+						<Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 1 }}>
+							<Button
+								variant="contained"
+								startIcon={<DownloadIcon />}
+								onClick={downloadExcel}
+								disabled={selectedRowCount === 0}
+								color="primary"
+							>
+								Download Excel ({selectedRowCount})
+							</Button>
+							<Button
+								variant="outlined"
+								onClick={clearSelection}
+								disabled={isSelectionEmpty}
+								size="small"
+							>
+								Clear Selection
+							</Button>
+							<Typography variant="body2" color="text.secondary">
+								Select rows in the table below to enable download
+							</Typography>
+						</Box>
 					</CardContent>
 				</Card>
 
@@ -366,6 +340,7 @@ export default function EarningAnalysisPage() {
 					columns={columns}
 					loading={loading}
 					rowHeight={80}
+					getRowId={(row) => row.id}
 					onRowClick={handleRowClick}
 					paginationModel={paginationModel}
 					onPaginationModelChange={handlePaginationModelChange}
@@ -375,8 +350,54 @@ export default function EarningAnalysisPage() {
 					initialState={{
 						pagination: { paginationModel: { pageSize: 50 } },
 					}}
-					disableRowSelectionOnClick
+					checkboxSelection
+					rowSelectionModel={rowSelectionModel}
+					onRowSelectionModelChange={(newSelection: GridRowSelectionModel) => {
+						handleSelectionChange(newSelection);
+					}}
 					density="compact"
+					disableVirtualization={true}
+					sx={{
+						// Sticky Checkbox column (leftmost at 0px)
+						'& .MuiDataGrid-columnHeader[data-field="__check__"], & .MuiDataGrid-cell[data-field="__check__"]':
+							{
+								position: 'sticky !important',
+								left: '0px !important',
+								backgroundColor: 'background.default',
+								zIndex: '1100 !important',
+								borderRight: '1px solid',
+								borderRightColor: 'divider',
+							},
+						// Sticky Ticker column (second at ~52px after checkbox)
+						'& .MuiDataGrid-columnHeader[data-field="stock.ticker"], & .MuiDataGrid-cell[data-field="stock.ticker"]':
+							{
+								position: 'sticky !important',
+								left: '50px !important',
+								backgroundColor: 'background.default',
+								zIndex: '1100 !important',
+								borderRight: '1px solid',
+								borderRightColor: 'divider',
+								boxShadow: '1px 0 4px rgba(0,0,0,0.05)',
+							},
+						// Sticky Company Name column (third at ~152px after checkbox + ticker)
+						'& .MuiDataGrid-columnHeader[data-field="stock.companyName"], & .MuiDataGrid-cell[data-field="stock.companyName"]':
+							{
+								position: 'sticky !important',
+								left: '150px !important',
+								backgroundColor: 'background.default',
+								zIndex: '1100 !important',
+								borderRight: '1px solid',
+								borderRightColor: 'divider',
+								boxShadow: '1px 0 4px rgba(0,0,0,0.05)',
+							},
+						// Ensure the viewport allows sticky positioning
+						'& .MuiDataGrid-virtualScroller': {
+							overflow: 'auto !important',
+						},
+						'& .MuiDataGrid-virtualScrollerRenderZone': {
+							position: 'relative',
+						},
+					}}
 				/>
 			</Paper>
 		</Container>

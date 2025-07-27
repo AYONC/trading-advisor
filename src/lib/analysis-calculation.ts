@@ -34,7 +34,7 @@ export function getAverageGrowth(values: number[]) {
 //   )),
 // 1)
 // E: roa, H: sector roa, L: 평균성장률 조정, M: 평균성장률
-// const x = 평균성장률 조정 ? 평균성장률 조정값 * 100 * sector_peg_ratio : average_eps_growth * 100 * sector_peg_ratio
+// const x = growth adjusted eps ? growth adjusted eps * 100 * sector_peg_ratio : average_eps_growth * 100 * sector_peg_ratio
 // const y = min(1.3, max(0.7, roa > sector_roa ? 1 + ln(1 + (roa - sector_roa)) : 1 - ln(1 + (sector_roa - roa))))
 // const result = x * y
 

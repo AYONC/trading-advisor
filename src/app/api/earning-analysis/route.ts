@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { EarningStockAnalysis } from '@/entities/analysis/earning-stock-analysis.entity';
+import { EpsGrowth } from '@/entities/analysis/eps-growth.entity';
+import { SectorRatio } from '@/entities/sector-ratio.entity';
 import { Stock } from '@/entities/stock.entity';
 import { getDataSource } from '@/lib/db';
 
@@ -22,7 +24,14 @@ export async function POST(request: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!stockId || period === undefined || !price || !pe || !roa || !epsRevisionGrade) {
+		if (
+			!stockId ||
+			period === undefined ||
+			!price ||
+			!pe ||
+			!roa ||
+			!epsRevisionGrade
+		) {
 			return NextResponse.json(
 				{ error: 'Missing required fields' },
 				{ status: 400 },
@@ -48,15 +57,26 @@ export async function POST(request: NextRequest) {
 
 		// Validate EPS revision grade
 		const validGrades = [
-			'A+', 'A', 'A-', 
-			'B+', 'B', 'B-', 
-			'C+', 'C', 'C-', 
-			'D+', 'D', 'D-', 
-			'E'
+			'A+',
+			'A',
+			'A-',
+			'B+',
+			'B',
+			'B-',
+			'C+',
+			'C',
+			'C-',
+			'D+',
+			'D',
+			'D-',
+			'E',
 		];
 		if (!validGrades.includes(epsRevisionGrade)) {
 			return NextResponse.json(
-				{ error: 'Invalid EPS revision grade. Must be one of: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, E' },
+				{
+					error:
+						'Invalid EPS revision grade. Must be one of: A+, A, A-, B+, B, B-, C+, C, C-, D+, D, D-, E',
+				},
 				{ status: 400 },
 			);
 		}
@@ -127,6 +147,8 @@ export async function GET(request: NextRequest) {
 		const dataSource = await getDataSource();
 		const earningAnalysisRepository =
 			dataSource.getRepository(EarningStockAnalysis);
+		const epsGrowthRepository = dataSource.getRepository(EpsGrowth);
+		const sectorRatioRepository = dataSource.getRepository(SectorRatio);
 
 		// Get URL search parameters for filtering and pagination
 		const { searchParams } = new URL(request.url);
@@ -142,7 +164,7 @@ export async function GET(request: NextRequest) {
 		let whereCondition = {};
 
 		if (stockId) {
-			whereCondition = { ...whereCondition, stockId: Number(stockId) };
+			whereCondition = { ...whereCondition, stock: { id: Number(stockId) } };
 		}
 
 		if (period) {
@@ -161,10 +183,39 @@ export async function GET(request: NextRequest) {
 			take: limitNumber,
 		});
 
+		// Get eps growth data and sector ratio data for all analyses
+		const analysesWithAdditionalData = await Promise.all(
+			analyses.map(async (analysis) => {
+				const epsGrowthData = await epsGrowthRepository.find({
+					where: {
+						stock: { id: analysis.stockId },
+						period: analysis.period,
+					},
+					order: {
+						year: 'ASC',
+					},
+				});
+
+				// Get sector ratio for this analysis
+				const sectorRatio = await sectorRatioRepository.findOne({
+					where: {
+						sector: { id: analysis.stock.sector.id },
+						period: analysis.period,
+					},
+				});
+
+				return {
+					...analysis,
+					epsGrowthData,
+					sectorRatio,
+				};
+			}),
+		);
+
 		const totalPages = Math.ceil(total / limitNumber);
 
 		return NextResponse.json({
-			data: analyses,
+			data: analysesWithAdditionalData,
 			pagination: {
 				current: pageNumber,
 				total: totalPages,

@@ -253,7 +253,7 @@ export default function RevenueAnalysisPage() {
 	}, [fetchAnalyses]);
 
 	return (
-		<Container maxWidth={100 as any}>
+		<Container maxWidth="xl">
 			<Box sx={{ py: 4 }}>
 				<Box sx={{ mb: 4 }}>
 					<Typography variant="h4" component="h1" gutterBottom>

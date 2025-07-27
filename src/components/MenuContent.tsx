@@ -10,6 +10,7 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { Divider } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -25,17 +26,6 @@ const mainListItems = [
 	{ text: 'Market', icon: <TimelineIcon />, href: '/market' },
 ];
 
-const basicDataItems = [
-	{ text: 'Sectors', icon: <BusinessIcon />, href: '/basic-data/sectors' },
-	{ text: 'Stocks', icon: <ShowChartIcon />, href: '/basic-data/stocks' },
-	{
-		text: 'Add Sector',
-		icon: <BusinessIcon />,
-		href: '/basic-data/add-sector',
-	},
-	{ text: 'Add Stock', icon: <AddBoxIcon />, href: '/basic-data/add-stock' },
-];
-
 const analysisItems = [
 	{
 		text: 'Earning Analysis',
@@ -47,25 +37,48 @@ const analysisItems = [
 		icon: <TrendingUpIcon />,
 		href: '/analysis/revenue',
 	},
+];
+
+const basicDataItems = [
+	{ text: 'Sectors Data', icon: <BusinessIcon />, href: '/basic-data/sectors' },
+	{ text: 'Stocks Data', icon: <ShowChartIcon />, href: '/basic-data/stocks' },
+	{
+		text: 'Add Sector',
+		icon: <BusinessIcon />,
+		href: '/basic-data/add-sector',
+	},
+	{ text: 'Add Stock', icon: <AddBoxIcon />, href: '/basic-data/add-stock' },
+];
+const analysisDataItems = [
+	{
+		text: 'Earning Analysis Data',
+		icon: <TrendingUpIcon />,
+		href: '/analysis-data/earning',
+	},
+	{
+		text: 'Revenue Analysis Data',
+		icon: <TrendingUpIcon />,
+		href: '/analysis-data/revenue',
+	},
 	{
 		text: 'Add Earning Analysis',
 		icon: <TrendingUpIcon />,
-		href: '/analysis/earning/add',
+		href: '/analysis-data/earning/add',
 	},
 	{
 		text: 'Add Revenue Analysis',
 		icon: <TrendingUpIcon />,
-		href: '/analysis/revenue/add',
+		href: '/analysis-data/revenue/add',
 	},
 	{
 		text: 'Add EPS Growth',
 		icon: <TrendingUpIcon />,
-		href: '/analysis/eps-growth/add',
+		href: '/analysis-data/eps-growth/add',
 	},
 	{
 		text: 'Add Sales Growth',
 		icon: <TrendingUpIcon />,
-		href: '/analysis/sales-growth/add',
+		href: '/analysis-data/sales-growth/add',
 	},
 ];
 
@@ -78,8 +91,12 @@ const secondaryListItems = [
 export default function MenuContent() {
 	const router = useRouter();
 	const pathname = usePathname();
+
 	const [analysisOpen, setAnalysisOpen] = React.useState(
 		pathname.startsWith('/analysis'),
+	);
+	const [analysisDataOpen, setAnalysisDataOpen] = React.useState(
+		pathname.startsWith('/analysis-data'),
 	);
 	const [basicDataOpen, setBasicDataOpen] = React.useState(
 		pathname.startsWith('/basic-data'),
@@ -87,6 +104,10 @@ export default function MenuContent() {
 
 	const handleAnalysisClick = () => {
 		setAnalysisOpen(!analysisOpen);
+	};
+
+	const handleAnalysisDataClick = () => {
+		setAnalysisDataOpen(!analysisDataOpen);
 	};
 
 	const handleBasicDataClick = () => {
@@ -115,6 +136,53 @@ export default function MenuContent() {
 						</ListItemButton>
 					</ListItem>
 				))}
+				{/* Analysis Section */}
+				<ListItem disablePadding sx={{ display: 'block' }}>
+					<ListItemButton onClick={handleAnalysisClick}>
+						<ListItemIcon>
+							<AnalyticsRoundedIcon />
+						</ListItemIcon>
+						<ListItemText
+							primary="Analysis"
+							disableTypography
+							sx={{ fontWeight: 'bold', fontSize: '14px' }}
+						/>
+						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
+					</ListItemButton>
+				</ListItem>
+				<Collapse
+					in={analysisOpen}
+					timeout="auto"
+					unmountOnExit
+					sx={{ mt: -1 }}
+				>
+					<List component="div">
+						{analysisItems.map((item) => (
+							<ListItem key={item.text} disablePadding>
+								<ListItemButton onClick={() => handleNavigation(item.href)}>
+									<ListItemIcon>{item.icon}</ListItemIcon>
+									<ListItemText primary={item.text} />
+								</ListItemButton>
+							</ListItem>
+						))}
+					</List>
+				</Collapse>
+
+				<Divider />
+				<ListItem disablePadding sx={{ display: 'block' }}>
+					<ListItemText
+						primary="Data"
+						sx={{
+							fontWeight: 'bold',
+							textTransform: 'uppercase',
+							fontSize: '10px',
+							color: 'text.secondary',
+							opacity: 0.7,
+							ml: 1,
+						}}
+						disableTypography
+					/>
+				</ListItem>
 
 				{/* Basic Data Section */}
 				<ListItem disablePadding sx={{ display: 'block' }}>
@@ -156,28 +224,28 @@ export default function MenuContent() {
 					</List>
 				</Collapse>
 
-				{/* Analysis Section */}
+				{/* Analysis Data Section */}
 				<ListItem disablePadding sx={{ display: 'block' }}>
-					<ListItemButton onClick={handleAnalysisClick}>
+					<ListItemButton onClick={handleAnalysisDataClick}>
 						<ListItemIcon>
 							<AnalyticsRoundedIcon />
 						</ListItemIcon>
 						<ListItemText
-							primary="Analysis"
+							primary="Analysis Data"
 							disableTypography
 							sx={{ fontWeight: 'bold', fontSize: '14px' }}
 						/>
-						{analysisOpen ? <ExpandLess /> : <ExpandMore />}
+						{analysisDataOpen ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 				</ListItem>
 				<Collapse
-					in={analysisOpen}
+					in={analysisDataOpen}
 					timeout="auto"
 					unmountOnExit
 					sx={{ mt: -1 }}
 				>
 					<List component="div" disablePadding>
-						{analysisItems.map((item) => (
+						{analysisDataItems.map((item) => (
 							<ListItem key={item.text} disablePadding>
 								<ListItemButton
 									sx={{ ml: 1 }}
