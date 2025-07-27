@@ -390,6 +390,11 @@ export default function EarningAnalysisPage() {
 								borderRightColor: 'divider',
 								boxShadow: '1px 0 4px rgba(0,0,0,0.05)',
 							},
+						'& .MuiDataGrid-columnHeader[data-field="eps_growth_avg"], & .MuiDataGrid-cell[data-field="eps_growth_avg"]':
+							{
+								borderLeft: '1px solid',
+								borderLeftColor: 'divider',
+							},
 						// Ensure the viewport allows sticky positioning
 						'& .MuiDataGrid-virtualScroller': {
 							overflow: 'auto !important',
