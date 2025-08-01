@@ -1,4 +1,4 @@
-import type { EarningAnalysis, EpsGrowthData } from './page';
+import type { EarningAnalysis, EpsGrowthData } from './types';
 
 export interface ProcessedAnalysisData extends EarningAnalysis {
 	eps_growth_0?: number | null;

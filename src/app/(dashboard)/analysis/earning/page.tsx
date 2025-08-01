@@ -22,70 +22,15 @@ import {
 	type GridRowSelectionModel,
 } from '@mui/x-data-grid';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { exportEarningAnalysis } from '@/utils/excel-export';
 import { useGridSelection } from '@/utils/grid-selection';
 import { generateColumns } from './column';
 import { processAnalysesData } from './earning-analysis-calculation';
-
-export interface Stock {
-	id: number;
-	ticker: string;
-	companyName: string;
-	sector: {
-		id: number;
-		name: string;
-	};
-}
-
-export interface EpsGrowthData {
-	id: number;
-	period: number;
-	year: number;
-	value: number;
-	createdAt: string;
-	updatedAt: string;
-}
-
-export interface SectorRatio {
-	id: number;
-	sectorId: number;
-	period: number;
-	roa: number;
-	pegRatio: number;
-	psgRatio: number;
-	operatingMargin: number;
-	createdAt: string;
-	updatedAt: string;
-}
-
-export interface EarningAnalysis {
-	id: number;
-	period: number;
-	price: number;
-	pe: number;
-	roa: number;
-	epsRevisionGrade: string;
-	epsGrowthAdjustedRate?: number;
-	createdAt: string;
-	updatedAt: string;
-	stock: Stock;
-	epsGrowthData: EpsGrowthData[];
-	sectorRatio?: SectorRatio;
-}
-
-interface PaginationInfo {
-	current: number;
-	total: number;
-	limit: number;
-	totalItems: number;
-	hasNext: boolean;
-	hasPrev: boolean;
-}
-
-interface ApiResponse {
-	data: EarningAnalysis[];
-	pagination: PaginationInfo;
-}
+import { exportEarningAnalysis } from './excel-export';
+import type {
+	EarningAnalysis,
+	EarningAnalysisApiResponse,
+	PaginationInfo,
+} from './types';
 
 export default function EarningAnalysisPage() {
 	const [rawAnalyses, setRawAnalyses] = useState<EarningAnalysis[]>([]);
@@ -204,7 +149,7 @@ export default function EarningAnalysisPage() {
 			const response = await fetch(`/api/earning-analysis?${params}`);
 
 			if (response.ok) {
-				const data: ApiResponse = await response.json();
+				const data: EarningAnalysisApiResponse = await response.json();
 				setRawAnalyses(data.data);
 				setPagination(data.pagination);
 				setPaginationModel({
