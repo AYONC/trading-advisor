@@ -7,7 +7,7 @@ import { alpha } from '@mui/material/styles';
 import type {} from '@mui/x-charts/themeAugmentation';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
 import type {} from '@mui/x-tree-view/themeAugmentation';
-import type * as React from 'react';
+import * as React from 'react';
 import Header from '@/components/Header';
 import SideMenu from '@/components/SideMenu';
 import AppTheme from '@/theme/AppTheme';
@@ -17,12 +17,19 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
+	const [sideMenuOpen, setSideMenuOpen] = React.useState(true);
+
+	const handleSideMenuToggle = () => {
+		setSideMenuOpen(!sideMenuOpen);
+	};
 	return (
 		<AppTheme>
 			<CssBaseline enableColorScheme />
 			<Box sx={{ display: 'flex' }}>
-				<SideMenu />
-				{/* <AppNavbar /> */}
+				<SideMenu
+					desktopOpen={sideMenuOpen}
+					onDesktopToggle={handleSideMenuToggle}
+				/>
 				{/* Main content */}
 				<Box
 					component="main"
@@ -32,6 +39,18 @@ export default function DashboardLayout({
 							? `rgba(${theme.vars.palette.background.defaultChannel} / 1)`
 							: alpha(theme.palette.background.default, 1),
 						overflow: 'auto',
+						transition: theme.transitions.create('margin', {
+							easing: theme.transitions.easing.sharp,
+							duration: theme.transitions.duration.leavingScreen,
+						}),
+						marginLeft: sideMenuOpen ? 0 : '-240px',
+						...(sideMenuOpen && {
+							transition: theme.transitions.create('margin', {
+								easing: theme.transitions.easing.easeOut,
+								duration: theme.transitions.duration.enteringScreen,
+							}),
+							marginLeft: 0,
+						}),
 					})}
 				>
 					<Stack
@@ -43,7 +62,7 @@ export default function DashboardLayout({
 							mt: { xs: 8, md: 0 },
 						}}
 					>
-						<Header />
+						<Header onMenuToggle={handleSideMenuToggle} />
 						{children}
 					</Stack>
 				</Box>

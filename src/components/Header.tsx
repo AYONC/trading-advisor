@@ -1,12 +1,23 @@
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import React from 'react';
 import ColorModeIconDropdown from '../theme/ColorModeIconDropdown';
 
-export default function Header() {
+interface HeaderProps {
+	onMenuToggle?: () => void;
+}
+
+export default function Header({ onMenuToggle }: HeaderProps) {
+	const theme = useTheme();
+	const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
 	return (
 		<Stack
 			direction="row"
 			sx={{
-				display: { xs: 'none', md: 'flex' },
+				display: 'flex',
 				width: '100%',
 				alignItems: { xs: 'flex-start', md: 'center' },
 				justifyContent: 'space-between',
@@ -15,7 +26,20 @@ export default function Header() {
 			}}
 			spacing={2}
 		>
-			<div></div>
+			{/* Menu toggle button for desktop only */}
+			{isDesktop && onMenuToggle && (
+				<Stack direction="row" sx={{ gap: 1 }}>
+					<IconButton
+						onClick={onMenuToggle}
+						sx={{
+							color: 'text.secondary',
+						}}
+					>
+						<MenuIcon />
+					</IconButton>
+				</Stack>
+			)}
+
 			<Stack direction="row" sx={{ gap: 1 }}>
 				<ColorModeIconDropdown />
 			</Stack>

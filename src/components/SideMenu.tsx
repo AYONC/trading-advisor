@@ -1,10 +1,13 @@
+import MenuIcon from '@mui/icons-material/Menu';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
+import Fab from '@mui/material/Fab';
 import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
 import Logo from './Logo';
 import MenuContent from './MenuContent';
@@ -23,30 +26,30 @@ const Drawer = styled(MuiDrawer)({
 	},
 });
 
-export default function SideMenu() {
-	return (
-		<Drawer
-			variant="permanent"
-			sx={{
-				display: { xs: 'none', md: 'block' },
-				[`& .${drawerClasses.paper}`]: {
-					backgroundColor: 'background.paper',
-				},
-			}}
-		>
-			{/* <Box
-				sx={{
-					display: 'flex',
-					mt: 'calc(var(--template-frame-height, 0px) + 4px)',
-					p: 1.5,
-				}}
-			>
-				<SelectContent />
-			</Box>
-			<Divider /> */}
+interface SideMenuProps {
+	desktopOpen?: boolean;
+	onDesktopToggle?: () => void;
+}
+
+export default function SideMenu({
+	desktopOpen = true,
+	onDesktopToggle: _onDesktopToggle,
+}: SideMenuProps) {
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+	const [mobileOpen, setMobileOpen] = React.useState(false);
+
+	const handleMobileDrawerToggle = () => {
+		setMobileOpen(!mobileOpen);
+	};
+
+	const getDrawerContent = () => (
+		<>
 			<Box
 				sx={{
 					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'flex-start',
 					mt: 'calc(var(--template-frame-height, 0px) + 4px)',
 					p: 1.5,
 				}}
@@ -63,7 +66,6 @@ export default function SideMenu() {
 				}}
 			>
 				<MenuContent />
-				{/* <CardAlert /> */}
 			</Box>
 			<Stack
 				direction="row"
@@ -94,6 +96,61 @@ export default function SideMenu() {
 				</Box>
 				<OptionsMenu />
 			</Stack>
-		</Drawer>
+		</>
+	);
+
+	return (
+		<>
+			{/* Desktop drawer */}
+			<Drawer
+				variant="persistent"
+				open={desktopOpen}
+				sx={{
+					display: { xs: 'none', md: 'block' },
+					[`& .${drawerClasses.paper}`]: {
+						backgroundColor: 'background.paper',
+					},
+				}}
+			>
+				{getDrawerContent()}
+			</Drawer>
+
+			{/* Mobile drawer */}
+			<Drawer
+				variant="temporary"
+				open={mobileOpen}
+				onClose={handleMobileDrawerToggle}
+				ModalProps={{
+					keepMounted: true, // Better open performance on mobile.
+				}}
+				sx={{
+					display: { xs: 'block', md: 'none' },
+					[`& .${drawerClasses.paper}`]: {
+						backgroundColor: 'background.paper',
+						boxSizing: 'border-box',
+						width: drawerWidth,
+					},
+				}}
+			>
+				{getDrawerContent()}
+			</Drawer>
+
+			{/* Floating Action Button for mobile */}
+			{isMobile && (
+				<Fab
+					color="primary"
+					aria-label="menu"
+					onClick={handleMobileDrawerToggle}
+					sx={{
+						position: 'fixed',
+						bottom: 24,
+						right: 24,
+						zIndex: theme.zIndex.speedDial,
+					}}
+				>
+					<MenuIcon />
+				</Fab>
+			)}
+		</>
 	);
 }
