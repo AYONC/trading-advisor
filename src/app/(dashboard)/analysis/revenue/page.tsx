@@ -335,7 +335,7 @@ export default function RevenueAnalysisPage() {
 								borderRightColor: 'divider',
 								boxShadow: '1px 0 4px rgba(0,0,0,0.05)',
 							},
-						'& .MuiDataGrid-columnHeader[data-field="eps_growth_avg"], & .MuiDataGrid-cell[data-field="eps_growth_avg"]':
+						'& .MuiDataGrid-columnHeader[data-field="sales_growth_avg"], & .MuiDataGrid-cell[data-field="sales_growth_avg"]':
 							{
 								borderLeft: '1px solid',
 								borderLeftColor: 'divider',

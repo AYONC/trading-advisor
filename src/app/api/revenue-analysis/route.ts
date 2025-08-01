@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { RevenueStockAnalysis } from '@/entities/analysis/revenue-stock-analysis.entity';
+import { SalesGrowth } from '@/entities/analysis/sales-growth.entity';
+import { SectorRatio } from '@/entities/sector-ratio.entity';
 import { Stock } from '@/entities/stock.entity';
 import { getDataSource } from '@/lib/db';
 
@@ -141,6 +143,8 @@ export async function GET(request: NextRequest) {
 		const dataSource = await getDataSource();
 		const revenueAnalysisRepository =
 			dataSource.getRepository(RevenueStockAnalysis);
+		const salesGrowthRepository = dataSource.getRepository(SalesGrowth);
+		const sectorRatioRepository = dataSource.getRepository(SectorRatio);
 
 		// Get URL search parameters for filtering and pagination
 		const { searchParams } = new URL(request.url);
@@ -175,10 +179,39 @@ export async function GET(request: NextRequest) {
 			take: limitNumber,
 		});
 
+		// Get eps growth data and sector ratio data for all analyses
+		const analysesWithAdditionalData = await Promise.all(
+			analyses.map(async (analysis) => {
+				const salesGrowthData = await salesGrowthRepository.find({
+					where: {
+						stock: { id: analysis.stockId },
+						period: analysis.period,
+					},
+					order: {
+						year: 'ASC',
+					},
+				});
+
+				// Get sector ratio for this analysis
+				const sectorRatio = await sectorRatioRepository.findOne({
+					where: {
+						sector: { id: analysis.stock.sector.id },
+						period: analysis.period,
+					},
+				});
+
+				return {
+					...analysis,
+					salesGrowthData,
+					sectorRatio,
+				};
+			}),
+		);
+
 		const totalPages = Math.ceil(total / limitNumber);
 
 		return NextResponse.json({
-			data: analyses,
+			data: analysesWithAdditionalData,
 			pagination: {
 				current: pageNumber,
 				total: totalPages,

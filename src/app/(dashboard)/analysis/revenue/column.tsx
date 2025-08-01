@@ -1,24 +1,8 @@
 import { Chip, Typography } from '@mui/material';
 import type { GridColDef } from '@mui/x-data-grid';
-import { formatDateTime } from '@/utils/date';
 
 export const generateColumns = (): GridColDef[] => {
 	const columns: GridColDef[] = [
-		{
-			field: 'period',
-			headerName: 'Period',
-			align: 'center',
-			headerAlign: 'center',
-			type: 'number',
-		},
-		{
-			field: 'stock.id',
-			headerName: 'Stock ID',
-			align: 'center',
-			headerAlign: 'center',
-			valueGetter: (_, row) => row.stock.id,
-			renderCell: (params) => params.row.stock.id,
-		},
 		{
 			field: 'stock.ticker',
 			headerName: 'Ticker',
@@ -35,11 +19,26 @@ export const generateColumns = (): GridColDef[] => {
 			field: 'stock.companyName',
 			headerName: 'Company Name',
 			flex: 1,
-			minWidth: 500,
+			minWidth: 300,
 			align: 'left',
 			headerAlign: 'left',
 			valueGetter: (_, row) => row.stock.companyName,
 			renderCell: (params) => params.row.stock.companyName,
+		},
+		{
+			field: 'period',
+			headerName: 'Period',
+			align: 'center',
+			headerAlign: 'center',
+			type: 'number',
+		},
+		{
+			field: 'stock.id',
+			headerName: 'Stock ID',
+			align: 'center',
+			headerAlign: 'center',
+			valueGetter: (_, row) => row.stock.id,
+			renderCell: (params) => params.row.stock.id,
 		},
 		{
 			field: 'stock.sector.name',
@@ -103,14 +102,6 @@ export const generateColumns = (): GridColDef[] => {
 			type: 'number',
 			renderCell: (params) =>
 				params.value ? `${(Number(params.value) * 100).toFixed(2)}%` : '-',
-		},
-		{
-			field: 'createdAt',
-			headerName: 'Created',
-			width: 200,
-			align: 'center',
-			headerAlign: 'center',
-			renderCell: (params) => formatDateTime(params.row.createdAt),
 		},
 	];
 
