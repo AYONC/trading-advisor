@@ -199,15 +199,16 @@ export function processAnalysesData(
 		);
 
 		const valuationDiscountRate = calculateValuationDiscountRate(
-			analysis.operatingMargin ?? 0,
-			analysis.sectorRatio?.operatingMargin ?? 0,
+			Number(analysis.operatingMargin) ?? 0,
+			Number(analysis.sectorRatio?.operatingMargin) ?? 0,
 		);
 
 		// Calculate 성장수익성 Valuation (PER)
-		const growthProfitabilityValuation = calculateGrowthProfitabilityValuation(
-			growthValuation,
-			valuationDiscountRate ?? 0,
-		) ?? 0;
+		const growthProfitabilityValuation =
+			calculateGrowthProfitabilityValuation(
+				growthValuation,
+				valuationDiscountRate ?? 0,
+			) ?? 0;
 
 		// Calculate 성장수익성 Valuation Price
 		const growthProfitabilityValuationPrice =

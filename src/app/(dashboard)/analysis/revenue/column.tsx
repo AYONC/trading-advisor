@@ -1,5 +1,6 @@
 import { Chip, Typography } from '@mui/material';
 import type { GridColDef } from '@mui/x-data-grid';
+import { formatDateTime } from '@/utils/date';
 
 export const generateColumns = (): GridColDef[] => {
 	const columns: GridColDef[] = [
@@ -19,7 +20,7 @@ export const generateColumns = (): GridColDef[] => {
 			field: 'stock.companyName',
 			headerName: 'Company Name',
 			flex: 1,
-			minWidth: 300,
+			minWidth: 120,
 			align: 'left',
 			headerAlign: 'left',
 			valueGetter: (_, row) => row.stock.companyName,
@@ -330,7 +331,7 @@ export const generateColumns = (): GridColDef[] => {
 			width: 200,
 			align: 'center',
 			headerAlign: 'center',
-			renderCell: (params) => params.row.createdAt,
+			renderCell: (params) => formatDateTime(params.row.createdAt),
 		},
 	];
 
